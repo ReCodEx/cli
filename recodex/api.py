@@ -102,6 +102,9 @@ class ApiClient:
             "environmentConfigs": configs
         })
 
+    def get_exercise_config(self, exercise_id):
+        return self.get("/exercises/{}/config".format(exercise_id))
+
     def update_exercise_config(self, exercise_id, config):
         self.post("/exercises/{}/config".format(exercise_id), data={"config": config})
 

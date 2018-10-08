@@ -1,3 +1,5 @@
+import json
+from ruamel import yaml
 import logging
 import sys
 from datetime import datetime, timedelta
@@ -108,3 +110,35 @@ def check_rs_evaluations(api: ApiClient, threshold):
 @pass_api_client
 def delete(api: ApiClient, exercise_id):
     api.delete_exercise(exercise_id)
+
+
+@cli.command()
+@click.argument("exercise_id")
+@click.option("--json/--yaml", "useJson", default=True)
+@pass_api_client
+def get_config(api: ApiClient, exercise_id, useJson):
+    """
+    Get exercise configuration in JSON (or possibly yaml) format
+    """
+    config = api.get_exercise_config(exercise_id)
+    if useJson:
+        json.dump(config, sys.stdout, sort_keys=True, indent=4)
+    else:
+        yaml.dump(config, sys.stdout)
+
+
+@cli.command()
+@click.argument("exercise_id")
+@click.argument("file_name")
+@click.option("--json/--yaml", "useJson", default=True)
+@pass_api_client
+def set_config(api: ApiClient, exercise_id, file_name, useJson):
+    """
+    Load a JSON or YAML from a file and set it as configuration.
+    """
+    with open(file_name, 'r') as stream:
+        if useJson:
+            config = json.load(stream)
+        else:
+            config = yaml.safe_load(stream)
+    api.update_exercise_config(exercise_id, config)
