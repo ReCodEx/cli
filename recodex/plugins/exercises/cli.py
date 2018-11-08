@@ -19,6 +19,100 @@ def cli():
 
 
 @cli.command()
+@click.option("--json/--yaml", "useJson", default=None)
+@pass_api_client
+def list_all(api: ApiClient, useJson):
+    """
+    List all exercises (as ID and name) in JSON, Yaml, or as a plain list.
+    """
+    exercises = api.get_exercises()
+    if useJson is True:
+        json.dump(exercises, sys.stdout, sort_keys=True, indent=4)
+    elif useJson is False:
+        yaml.dump(exercises, sys.stdout)
+    else:
+        for exercise in exercises:
+            click.echo("{} {}".format(exercise["id"], exercise["name"])) 
+
+
+@cli.command()
+@click.argument("exercise_id")
+@click.option("--json/--yaml", "useJson", default=True)
+@pass_api_client
+def get(api: ApiClient, exercise_id, useJson):
+    """
+    Get exercise data and print it in JSON or Yaml.
+    """
+    exercise = api.get_exercise(exercise_id)
+    if useJson:
+        json.dump(exercise, sys.stdout, sort_keys=True, indent=4)
+    else:
+        yaml.dump(exercise, sys.stdout)
+
+
+@cli.command()
+@click.argument("exercise_id")
+@click.option("--json/--yaml", "useJson", default=None)
+@pass_api_client
+def get_ref_solutions(api: ApiClient, exercise_id, useJson):
+    """
+    List all reference solutions of given exercise in JSON, Yaml, or as a plain list.
+    """
+    solutions = api.get_reference_solutions(exercise_id)
+    if useJson is True:
+        json.dump(solutions, sys.stdout, sort_keys=True, indent=4)
+    elif useJson is False:
+        yaml.dump(solutions, sys.stdout)
+    else:
+        for solution in solutions:
+            ts = int(solution["solution"]["createdAt"])
+            date = datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+            click.echo("{} {} {} {}".format(solution["id"], solution["runtimeEnvironmentId"],
+                                            date, solution["description"]))
+
+
+@cli.command()
+@click.argument("ref_solution_id")
+@click.option("--json/--yaml", "useJson", default=None)
+@pass_api_client
+def get_ref_solution_evaluations(api: ApiClient, ref_solution_id, useJson):
+    """
+    Get reference solution evaluations and print them all in JSON or Yaml, or as a plain list.
+    """
+    evaluations = api.get_reference_solution_evaluations(ref_solution_id)
+    if useJson is True:
+        json.dump(evaluations, sys.stdout, sort_keys=True, indent=4)
+    elif useJson is False:
+        yaml.dump(evaluations, sys.stdout)
+    else:
+        for evaluation in evaluations:
+            ts = int(evaluation["submittedAt"])
+            date = datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+            click.echo("{} {} {} {}".format(evaluation["id"], evaluation["evaluationStatus"], evaluation["isCorrect"], date))
+
+
+@cli.command()
+@click.argument("evaluation_id")
+@pass_api_client
+def delete_ref_solution_evaluation(api: ApiClient, evaluation_id):
+    """
+    Delete referenece solution evaluation and all the results and logs.
+    """
+    api.delete_reference_solution_evaluation(evaluation_id)
+
+
+@cli.command()
+@click.argument("ref_solution_id")
+@click.option('--debug', is_flag=True)
+@pass_api_client
+def resubmit_ref_solution(api: ApiClient, ref_solution_id, debug):
+    """
+    Resubmit reference solution for another evaluation.
+    """
+    api.resubmit_reference_solution(ref_solution_id, debug)
+
+
+@cli.command()
 @click.argument("language")
 @click.argument("exercise_id")
 @pass_api_client
@@ -48,7 +142,6 @@ def add_reference_solution(api: ApiClient, exercise_id, note, runtime_environmen
         "runtimeEnvironmentId": runtime_environment,
         "files": [api.upload_file(file, open(file, "r")) for file in files]
     })
-    
     click.echo(solution["id"])
 
 

@@ -53,8 +53,8 @@ class ApiClient:
     def get_exercise(self, exercise_id):
         return self.get("/exercises/{}".format(exercise_id))
 
-    def get_exercises(self):
-        return self.get("/exercises")
+    def get_exercises(self, offset=0, limit=0):
+        return self.get("/exercises?offset={}&limit={}".format(offset, limit))["items"]
 
     def get_reference_solutions(self, exercise_id):
         return self.get("/reference-solutions/exercise/{}".format(exercise_id))
@@ -94,6 +94,9 @@ class ApiClient:
     def delete_exercise(self, exercise_id):
         self.delete('/exercises/{}'.format(exercise_id))
 
+    def delete_reference_solution_evaluation(self, evaluation_id):
+        self.delete('/reference-solutions/evaluation/{}'.format(evaluation_id))
+
     def create_reference_solution(self, exercise_id, data):
         return self.post('/reference-solutions/exercise/{}/submit'.format(exercise_id), data=data)
 
@@ -120,6 +123,9 @@ class ApiClient:
 
     def evaluate_reference_solutions(self, exercise_id):
         self.post("/reference-solutions/exercise/{}/evaluate".format(exercise_id), data={})
+
+    def resubmit_reference_solution(self, ref_solution_id, debug=False):
+        return self.post("/reference-solutions/{}/resubmit".format(ref_solution_id), data={"debug": debug})
 
     def get_hwgroups(self):
         return self.get("/hardware-groups")
