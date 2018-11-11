@@ -32,7 +32,7 @@ def list_all(api: ApiClient, useJson):
         yaml.dump(exercises, sys.stdout)
     else:
         for exercise in exercises:
-            click.echo("{} {}".format(exercise["id"], exercise["name"])) 
+            click.echo("{} {}".format(exercise["id"], exercise["name"]).encode("utf-8")) 
 
 
 @cli.command()
@@ -67,8 +67,9 @@ def get_ref_solutions(api: ApiClient, exercise_id, useJson):
         for solution in solutions:
             ts = int(solution["solution"]["createdAt"])
             date = datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-            click.echo("{} {} {} {}".format(solution["id"], solution["runtimeEnvironmentId"],
-                                            date, solution["description"]))
+            click.echo("{} {} {} {}".format(
+                solution["id"], solution["runtimeEnvironmentId"], date, solution["description"]
+            ).encode("utf-8"))
 
 
 @cli.command()
@@ -88,7 +89,9 @@ def get_ref_solution_evaluations(api: ApiClient, ref_solution_id, useJson):
         for evaluation in evaluations:
             ts = int(evaluation["submittedAt"])
             date = datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-            click.echo("{} {} {} {}".format(evaluation["id"], evaluation["evaluationStatus"], evaluation["isCorrect"], date))
+            click.echo("{} {} {} {}".format(
+                evaluation["id"], evaluation["evaluationStatus"], evaluation["isCorrect"], date
+            ).encode("utf-8"))
 
 
 @cli.command()
