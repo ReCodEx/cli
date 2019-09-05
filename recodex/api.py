@@ -168,10 +168,22 @@ class ApiClient:
             'instanceId': instance_id
         })
 
+    def set_allow_user(self, user_id, allow):
+        return self.post("/users/{}/allowed".format(user_id), data={"isAllowed": allow})
+
     # Groups
 
     def group_add_student(self, group_id, user_id):
         return self.post("/groups/{}/students/{}".format(group_id, user_id))
+
+    def group_remove_student(self, group_id, user_id):
+        return self.delete("/groups/{}/students/{}".format(group_id, user_id))
+
+    def group_attach_exercise(self, group_id, exercise_id):
+        return self.post("/exercises/{}/groups/{}".format(exercise_id, group_id))
+
+    def group_detach_exercise(self, group_id, exercise_id):
+        return self.delete("/exercises/{}/groups/{}".format(exercise_id, group_id))
 
     # Assignments
 
@@ -202,6 +214,6 @@ class ApiClient:
             raise RuntimeError("Loading JSON response failed")
 
         if not json["success"]:
-            raise RuntimeError("Received error from API: " + json["msg"])
+            raise RuntimeError("Received error from API: " + json["error"]["message"])
 
         return json["payload"]
