@@ -105,3 +105,25 @@ def edit(api: ApiClient, id, name, gravatar):
     if gravatar is not None:
         data["gravatarUrlEnabled"] = gravatar
     api.update_user(id, data)
+
+
+@cli.command()
+@click.argument("id")
+@pass_api_client
+def enable(api: ApiClient, id):
+    """
+    Enable user (who was previously disabled)
+    """
+
+    api.set_allow_user(id, True)
+
+
+@cli.command()
+@click.argument("id")
+@pass_api_client
+def disable(api: ApiClient, id):
+    """
+    Disable user (the user will no longer be allowed to log in or perform any other API calls)
+    """
+
+    api.set_allow_user(id, False)
