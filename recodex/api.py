@@ -168,6 +168,9 @@ class ApiClient:
             'instanceId': instance_id
         })
 
+    def delete_user(self, user_id):
+        return self.delete("/users/{}".format(user_id))
+
     def set_allow_user(self, user_id, allow):
         return self.post("/users/{}/allowed".format(user_id), data={"isAllowed": allow})
 

@@ -127,3 +127,14 @@ def disable(api: ApiClient, id):
     """
 
     api.set_allow_user(id, False)
+
+
+@cli.command()
+@click.argument("id")
+@pass_api_client
+def delete(api: ApiClient, id):
+    """
+    Delete user (users are only soft-deleted)
+    """
+
+    api.delete_user(id)
