@@ -196,6 +196,29 @@ class ApiClient:
     def get_assignment_best_solutions(self, assignment_id):
         return self.get("/exercise-assignments/{}/best-solutions".format(assignment_id))
 
+    # Shadow Assignments
+
+    def get_shadow_assignment(self, assignment_id):
+        return self.get("/shadow-assignments/{}".format(assignment_id))
+
+    def create_shadow_assignment_points(self, assignment_id, user_id, points, note, awarded_at=None):
+        return self.post("/shadow-assignments/{}/create-points/".format(assignment_id), data={
+            'userId': user_id,
+            'points': points,
+            'note': note,
+            'awardedAt': awarded_at,
+        })
+
+    def update_shadow_assignment_points(self, points_id, points, note, awarded_at=None):
+        return self.post("/shadow-assignments/points/{}".format(points_id), data={
+            'points': points,
+            'note': note,
+            'awardedAt': awarded_at,
+        })
+
+    def delete_shadow_assignment_points(self, points_id):
+        return self.delete("/shadow-assignments/points/{}".format(points_id))
+
     # Misc
 
     def get_group_students(self, group_id):
