@@ -130,6 +130,24 @@ class ApiClient:
     def get_hwgroups(self):
         return self.get("/hardware-groups")
 
+    def get_exercise_tags(self):
+        return self.get("/exercises/tags")
+
+    def get_exercise_tags_stats(self):
+        return self.get("/exercises/tags-stats")
+
+    def exercise_add_tag(self, exercise_id, tag):
+        return self.post("/exercises/{}/tags/{}".format(exercise_id, tag))
+
+    def exercise_remove_tag(self, exercise_id, tag):
+        return self.delete("/exercises/{}/tags/{}".format(exercise_id, tag))
+
+    def exercise_tags_rename_global(self, tag, rename_to, force):
+        return self.post("/exercises/tags/{}?renameTo={}&force={}".format(tag, rename_to, 1 if force else 0))
+
+    def exercise_tags_remove_global(self, tag):
+        return self.delete("/exercises/tags/{}".format(tag))
+
     # Authentication
 
     def login(self, username, password):

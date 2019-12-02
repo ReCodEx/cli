@@ -32,7 +32,7 @@ def list_all(api: ApiClient, useJson):
         yaml.dump(exercises, sys.stdout)
     else:
         for exercise in exercises:
-            click.echo("{} {}".format(exercise["id"], exercise["name"])) 
+            click.echo("{} {}".format(exercise["id"], exercise["name"]))
 
 
 @cli.command()
@@ -235,3 +235,66 @@ def set_config(api: ApiClient, exercise_id, file_name, useJson):
         else:
             config = yaml.safe_load(stream)
     api.update_exercise_config(exercise_id, config)
+
+
+@cli.command()
+@click.option('--stats', is_flag=True)
+@pass_api_client
+def tags_get_all(api: ApiClient, stats):
+    """
+    Get all tag names available. Optionally with statistics (how many exercises use each tag).
+    """
+    if stats:
+        tags = api.get_exercise_tags_stats()
+        for tag, count in tags.items():
+            click.echo("{} {}".format(tag, count))
+    else:
+        tags = api.get_exercise_tags()
+        for tag in tags:
+            click.echo(tag)
+
+
+@cli.command()
+@click.argument("exercise_id")
+@click.argument("tag")
+@pass_api_client
+def tags_add(api: ApiClient, exercise_id, tag):
+    """
+    Add specific tag to given exercise
+    """
+    api.exercise_add_tag(exercise_id, tag)
+
+
+@cli.command()
+@click.argument("exercise_id")
+@click.argument("tag")
+@pass_api_client
+def tags_remove(api: ApiClient, exercise_id, tag):
+    """
+    Remove specific tag from given exercise
+    """
+    api.exercise_remove_tag(exercise_id, tag)
+
+
+@cli.command()
+@click.argument("tag")
+@click.argument("rename_to")
+@click.option('--force', is_flag=True)
+@pass_api_client
+def tags_rename_global(api: ApiClient, tag, rename_to, force):
+    """
+    Rename a tag globally. If the new name already exists, the operation will fail unless forced. HANDLE WITH CARE!
+    """
+    res = api.exercise_tags_rename_global(tag, rename_to, force)
+    click.echo("{} exercise(s) affected".format(res["count"]))
+
+
+@cli.command()
+@click.argument("tag")
+@pass_api_client
+def tags_remove_global(api: ApiClient, tag):
+    """
+    Remove a tag from all exercises. HANDLE WITH CARE!
+    """
+    res = api.exercise_tags_remove_global(tag)
+    click.echo("{} exercise(s) affected".format(res["count"]))
