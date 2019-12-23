@@ -1,8 +1,10 @@
 import click
 import unicodedata
+import sys
 import os
 import datetime
 import json
+from ruamel import yaml
 
 from recodex.api import ApiClient
 from recodex.decorators import pass_api_client
@@ -79,3 +81,28 @@ def download_best_solutions(api: ApiClient, download_dir, assignment_id):
             created = datetime.datetime.fromtimestamp(best["solution"]["createdAt"]).strftime('%Y-%m-%d %H:%M:%S')
             click.echo("Saving {} ... {} points, {}".format(file_name, points, created))
             api.download_solution(best['id'], "{}/{}".format(download_dir, file_name))
+
+
+@cli.command()
+@click.argument("assignment_id")
+@click.option("--json/--yaml", "useJson", default=None)
+@pass_api_client
+def get_solutions(api: ApiClient, assignment_id, useJson):
+    """
+    Get assignment solutions (including points, score, ...) of all users.
+    """
+
+    solutions = api.get_assignment_solutions(assignment_id)
+    if useJson is True:
+        json.dump(solutions, sys.stdout, sort_keys=True, indent=4)
+    elif useJson is False:
+        yaml.dump(solutions, sys.stdout)
+    else:
+        for solution in solutions:
+            flags = []
+            if (solution["accepted"]):
+                flags.append("accepted")
+            if (solution["isBestSolution"]):
+                flags.append("best")
+            points = solution["overriddenPoints"] if solution["overriddenPoints"] else solution["actualPoints"]
+            click.echo("{} {} {}+{}/{} {}".format(solution["id"], solution["solution"]["userId"], points, solution["bonusPoints"], solution["maxPoints"], ", ".join(flags)))

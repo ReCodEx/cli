@@ -211,6 +211,9 @@ class ApiClient:
     def get_assignment(self, assignment_id):
         return self.get("/exercise-assignments/{}".format(assignment_id))
 
+    def get_assignment_solutions(self, assignment_id):
+        return self.get("/exercise-assignments/{}/solutions".format(assignment_id))
+
     def get_assignment_best_solutions(self, assignment_id):
         return self.get("/exercise-assignments/{}/best-solutions".format(assignment_id))
 
