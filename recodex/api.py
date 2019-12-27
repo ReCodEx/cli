@@ -206,7 +206,7 @@ class ApiClient:
     def group_detach_exercise(self, group_id, exercise_id):
         return self.delete("/exercises/{}/groups/{}".format(exercise_id, group_id))
 
-    # Assignments
+    # Assignments and related stuff...
 
     def get_assignment(self, assignment_id):
         return self.get("/exercise-assignments/{}".format(assignment_id))
@@ -216,6 +216,9 @@ class ApiClient:
 
     def get_assignment_best_solutions(self, assignment_id):
         return self.get("/exercise-assignments/{}/best-solutions".format(assignment_id))
+
+    def get_solution_comments(self, solution_id):
+        return self.get("/comments/{}".format(solution_id))
 
     # Shadow Assignments
 
