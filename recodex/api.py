@@ -220,6 +220,9 @@ class ApiClient:
     def get_solution_comments(self, solution_id):
         return self.get("/comments/{}".format(solution_id))
 
+    def solution_set_flag(self, solution_id, flag, value):
+        return self.post("assignment-solutions/{}/set-flag/{}".format(solution_id, flag), data={"value": value})
+
     # Shadow Assignments
 
     def get_shadow_assignment(self, assignment_id):

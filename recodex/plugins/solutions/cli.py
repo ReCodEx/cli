@@ -48,3 +48,19 @@ def get_comments(api: ApiClient, solution_id, useJson):
             click.echo("\n>>> {} at {} ({}) [{}]:".format(comment["user"]["name"], posted, "private" if comment["isPrivate"] else "public", comment["id"]))
             click.echo(comment["text"])
             click.echo("\n-----")
+
+
+@cli.command()
+@click.argument("flag")
+@click.argument("solution_id")
+@click.option('--unset', is_flag=True)
+@pass_api_client
+def set_flag(api: ApiClient, flag, solution_id, unset):
+    """
+    Set solution flag (accepted or reviewed).
+    """
+
+    if flag not in ["accepted", "reviewed"]:
+        click.echo("Invalid flag '{}'.".format(flag))
+    else:
+        api.solution_set_flag(solution_id, flag, not unset)
