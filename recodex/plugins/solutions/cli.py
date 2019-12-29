@@ -51,6 +51,19 @@ def get_comments(api: ApiClient, solution_id, useJson):
 
 
 @cli.command()
+@click.argument("solution_id")
+@click.argument("points", type=int)
+@click.option('--override', '-o', type=int, default=None)
+@pass_api_client
+def set_bonus_points(api: ApiClient, solution_id, points, override):
+    """
+    Set bonus points and optionally also points override.
+    """
+
+    api.solution_set_bonus_points(solution_id, points, override)
+
+
+@cli.command()
 @click.argument("flag")
 @click.argument("solution_id")
 @click.option('--unset', is_flag=True)
