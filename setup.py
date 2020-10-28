@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='recodex-cli',
-    version='0.0.11',
+    version='0.0.13',
     description='ReCodEx CLI',
     long_description='A command line frontend to the ReCodEx programmer evaluation system',
     classifiers=[

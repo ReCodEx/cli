@@ -226,6 +226,12 @@ class ApiClient:
     def solution_set_flag(self, solution_id, flag, value):
         return self.post("assignment-solutions/{}/set-flag/{}".format(solution_id, flag), data={"value": value})
 
+    def solution_resubmit(self, solution_id, debug=False):
+        return self.post("assignment-solutions/{}/resubmit".format(solution_id), data={"debug": debug})
+
+    def delete_solution(self, solution_id):
+        return self.delete("assignment-solutions/{}".format(solution_id))
+
     # Shadow Assignments
 
     def get_shadow_assignment(self, assignment_id):

@@ -77,3 +77,26 @@ def set_flag(api: ApiClient, flag, solution_id, unset):
         click.echo("Invalid flag '{}'.".format(flag))
     else:
         api.solution_set_flag(solution_id, flag, not unset)
+
+
+@cli.command()
+@click.argument("solution_id")
+@click.option('--debug', is_flag=True)
+@pass_api_client
+def resubmit(api: ApiClient, solution_id, debug):
+    """
+    Resubmit given solution for re-evaluation.
+    """
+
+    api.solution_resubmit(solution_id, debug)
+
+
+@cli.command()
+@click.argument("solution_id")
+@pass_api_client
+def delete(api: ApiClient, solution_id):
+    """
+    Delete solution, all related files, and all submission results.
+    """
+
+    api.delete_solution(solution_id)
