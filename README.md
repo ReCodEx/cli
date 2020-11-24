@@ -1,6 +1,6 @@
 # ReCodEx CLI
 
-[![Build Status](https://travis-ci.org/ReCodEx/cli.svg?branch=master)](https://travis-ci.org/ReCodEx/cli)
+[![Build Status](https://github.com/ReCodEx/cli/workflows/CI/badge.svg)](https://github.com/ReCodEx/cli/actions)
 
 Command line interface to the ReCodEx system.
 
