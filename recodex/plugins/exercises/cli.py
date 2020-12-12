@@ -2,10 +2,10 @@ import json
 from ruamel import yaml
 import logging
 import sys
+import io
 from datetime import datetime, timedelta
 
 import click
-from html2text import html2text
 
 from recodex.api import ApiClient
 from recodex.decorators import pass_api_client
@@ -113,20 +113,38 @@ def resubmit_ref_solution(api: ApiClient, ref_solution_id, debug):
 
 
 @cli.command()
-@click.argument("language")
+@click.argument("locale")
 @click.argument("exercise_id")
+@click.option('--include_name', is_flag=True)
 @pass_api_client
-def add_localization(api: ApiClient, language, exercise_id):
+def add_localization(api: ApiClient, locale, exercise_id, include_name):
     """
-    Add a localized text to an exercise.
-    The text is read from the standard input. HTML and Markdown are accepted.
+    Add (or update if exists) a localized text of an exercise. The text is read from the standard input.
+    If includeName flag is set, the first line of the input is used as the name.
     """
-    exercise = api.get_exercise(exercise_id)
-    exercise["localizedTexts"].append({
-        "locale": language,
-        "text": html2text(sys.stdin.read())
-    })
+    full_exercise = api.get_exercise(exercise_id)
+    copy_props = ["version", "difficulty", "localizedTexts", "isPublic", "isLocked", "configurationType",
+                  "solutionFilesLimit", "solutionFilesLimit", "solutionSizeLimit", "mergeJudgeLogs"]
+    exercise = {}
+    for prop in copy_props:
+        exercise[prop] = full_exercise[prop]
 
+    localizedText = next((lt for lt in exercise["localizedTexts"] if lt["locale"] == locale), None)
+    if localizedText is None:
+        localizedText = {
+            "locale": locale,
+            "name": "",
+            "text": "",
+            "link": "",
+            "description": ""
+        }
+        exercise["localizedTexts"].append(localizedText)
+
+    input_stream = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
+    if include_name is True:
+        localizedText["name"] = input_stream.readline().strip()
+
+    localizedText["text"] = input_stream.read()
     api.update_exercise(exercise_id, exercise)
 
 
