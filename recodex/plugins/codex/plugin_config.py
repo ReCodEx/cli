@@ -1,4 +1,4 @@
-from ruamel import yaml
+from ruamel.yaml import YAML
 
 from pathlib import Path
 from typing import NamedTuple, Dict
@@ -26,6 +26,6 @@ class Config(NamedTuple):
     def load(cls, config_path: Path):
         if not config_path.exists():
             return cls()
-
-        config = yaml.safe_load(config_path.open("r"))
+        yaml = YAML(typ="safe")
+        config = yaml.load(config_path.open("r"))
         return cls(**config)

@@ -1,7 +1,7 @@
 from functools import lru_cache
 
 import jwt
-from ruamel import yaml
+from ruamel.yaml import YAML
 from typing import NamedTuple, Optional
 from datetime import datetime, timezone
 from pathlib import Path
@@ -31,7 +31,8 @@ class UserContext(NamedTuple):
         """
 
         validity_period = self.token_data["exp"] - self.token_data["iat"]
-        time_until_expiration = self.token_data["exp"] - datetime.now(timezone.utc).timestamp()
+        time_until_expiration = self.token_data["exp"] - \
+            datetime.now(timezone.utc).timestamp()
         return validity_period * threshold > time_until_expiration
 
     @property
@@ -43,9 +44,12 @@ class UserContext(NamedTuple):
 
     @classmethod
     def load(cls, config_path: Path):
-        config = yaml.safe_load(config_path.open("r"))
+        yaml = YAML(typ="safe")
+        config = yaml.load(config_path.open("r")) or {}
         return cls(**config)
 
     def store(self, config_path: Path):
         config_path.parent.mkdir(parents=True, exist_ok=True)
-        yaml.dump(dict(self._asdict()), config_path.open("w"))
+        yaml = YAML(typ="safe")
+        with config_path.open("w") as fp:
+            yaml.dump(dict(self._asdict()), fp)

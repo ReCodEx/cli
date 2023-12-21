@@ -13,7 +13,7 @@ setup(
         'Operating System :: Unix',
         'Programming Language :: Python :: Implementation :: CPython',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.6'
+        'Programming Language :: Python :: 3.9'
     ],
     keywords='recodex',
     url='https://github.com/ReCodEx/cli',
@@ -21,8 +21,9 @@ setup(
     license='MIT',
     packages=find_packages("."),
     include_package_data=True,
-    python_requires='>=3.6',
-    install_requires=['click', 'requests', 'appdirs', 'ruamel.yaml', 'bs4', 'lxml', 'html2text', 'pyjwt'],
+    python_requires='>=3.9',
+    install_requires=['setuptools', 'click', 'requests', 'appdirs',
+                      'ruamel.yaml', 'bs4', 'lxml', 'html2text', 'pyjwt'],
     entry_points={
         'console_scripts':
             ['recodex = recodex.cli:cli'],

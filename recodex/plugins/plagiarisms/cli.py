@@ -1,7 +1,7 @@
 import sys
 import click
 import json
-from ruamel import yaml
+from ruamel.yaml import YAML
 
 from recodex.api import ApiClient
 from recodex.decorators import pass_api_client
@@ -50,6 +50,7 @@ def add_similarity(api: ApiClient, id, solution_id, useJson):
     if useJson:
         data = json.load(sys.stdin)
     else:
-        data = yaml.safe_load(sys.stdin)
+        yaml = YAML(typ="safe")
+        data = yaml.load(sys.stdin)
     print(data)
     api.add_plagiarism_detected_similarity(id, solution_id, data)

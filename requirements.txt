@@ -1,6 +1,7 @@
+setuptools
 click>=6.0,<=7.0
 requests
-ruamel.yaml
+ruamel.yaml>=0.17
 appdirs
 pyjwt
 

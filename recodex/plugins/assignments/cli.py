@@ -3,7 +3,7 @@ import sys
 import os
 import datetime
 import json
-from ruamel import yaml
+from ruamel.yaml import YAML
 
 from recodex.api import ApiClient
 from recodex.decorators import pass_api_client
@@ -52,7 +52,8 @@ def download_best_solutions(api: ApiClient, download_dir, assignment_id):
     if download_dir is None:
         download_dir = "."
     if not os.path.exists(download_dir) or not os.path.isdir(download_dir):
-        click.echo("Download path '{}' must exist and must be a directory.".format(download_dir))
+        click.echo(
+            "Download path '{}' must exist and must be a directory.".format(download_dir))
         return
 
     # Get assignment metadata and best solution for each student ...
@@ -74,9 +75,12 @@ def download_best_solutions(api: ApiClient, download_dir, assignment_id):
                 asciiize_string(student["name"]["lastName"]),
                 asciiize_string(student["name"]["firstName"]), student["id"])
             points = safe_get_solution_points(best)
-            created = datetime.datetime.fromtimestamp(best["createdAt"]).strftime('%Y-%m-%d %H:%M:%S')
-            click.echo("Saving {} ... {} points, {}".format(file_name, points, created))
-            api.download_solution(best['id'], "{}/{}".format(download_dir, file_name))
+            created = datetime.datetime.fromtimestamp(
+                best["createdAt"]).strftime('%Y-%m-%d %H:%M:%S')
+            click.echo("Saving {} ... {} points, {}".format(
+                file_name, points, created))
+            api.download_solution(
+                best['id'], "{}/{}".format(download_dir, file_name))
 
 
 @cli.command()
@@ -92,6 +96,7 @@ def get_solutions(api: ApiClient, assignment_id, useJson):
     if useJson is True:
         json.dump(solutions, sys.stdout, sort_keys=True, indent=4)
     elif useJson is False:
+        yaml = YAML(typ="safe")
         yaml.dump(solutions, sys.stdout)
     else:
         for solution in solutions:

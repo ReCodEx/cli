@@ -1,5 +1,5 @@
 import json
-from ruamel import yaml
+from ruamel.yaml import YAML
 import logging
 import sys
 import io
@@ -36,6 +36,7 @@ def list_all(api: ApiClient, useJson, offset, limit, order, locale):
     if useJson is True:
         json.dump(exercises, sys.stdout, sort_keys=True, indent=4)
     elif useJson is False:
+        yaml = YAML(typ="safe")
         yaml.dump(exercises, sys.stdout)
     else:
         for exercise in exercises:
@@ -54,7 +55,29 @@ def get(api: ApiClient, exercise_id, useJson):
     if useJson:
         json.dump(exercise, sys.stdout, sort_keys=True, indent=4)
     else:
+        yaml = YAML(typ="safe")
         yaml.dump(exercise, sys.stdout)
+
+
+@cli.command()
+@click.argument("solution_id")
+@click.option("--json/--yaml", "useJson", default=None)
+@pass_api_client
+def get_ref_solution(api: ApiClient, solution_id, useJson):
+    """
+    Get one reference solution by its id.
+    """
+    solution = api.get_reference_solution(solution_id)
+    if useJson is True:
+        json.dump(solution, sys.stdout, sort_keys=True, indent=4)
+    elif useJson is False:
+        yaml = YAML(typ="safe")
+        yaml.dump(solution, sys.stdout)
+    else:
+        ts = int(solution["createdAt"])
+        date = datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+        click.echo("{} {} {} {}".format(solution["id"], solution["runtimeEnvironmentId"],
+                                        date, solution["description"]))
 
 
 @cli.command()
@@ -69,6 +92,7 @@ def get_ref_solutions(api: ApiClient, exercise_id, useJson):
     if useJson is True:
         json.dump(solutions, sys.stdout, sort_keys=True, indent=4)
     elif useJson is False:
+        yaml = YAML(typ="safe")
         yaml.dump(solutions, sys.stdout)
     else:
         for solution in solutions:
@@ -90,6 +114,7 @@ def get_ref_solution_evaluations(api: ApiClient, ref_solution_id, useJson):
     if useJson is True:
         json.dump(evaluations, sys.stdout, sort_keys=True, indent=4)
     elif useJson is False:
+        yaml = YAML(typ="safe")
         yaml.dump(evaluations, sys.stdout)
     else:
         for evaluation in evaluations:
@@ -147,7 +172,8 @@ def add_localization(api: ApiClient, locale, exercise_id, include_name):
     for prop in copy_props:
         exercise[prop] = full_exercise[prop]
 
-    localizedText = next((lt for lt in exercise["localizedTexts"] if lt["locale"] == locale), None)
+    localizedText = next(
+        (lt for lt in exercise["localizedTexts"] if lt["locale"] == locale), None)
     if localizedText is None:
         localizedText = {
             "locale": locale,
@@ -167,7 +193,8 @@ def add_localization(api: ApiClient, locale, exercise_id, include_name):
 
 
 def _add_reference_solution(api: ApiClient, exercise_id, note, runtime_environment, files):
-    uploaded_files = [api.upload_file(file, open(file, "r"))["id"] for file in files]
+    uploaded_files = [api.upload_file(file, open(file, "r"))[
+        "id"] for file in files]
 
     preflight = api.presubmit_check(exercise_id, uploaded_files)
     if (preflight["environments"] is None or len(preflight["environments"]) == 0):
@@ -178,7 +205,8 @@ def _add_reference_solution(api: ApiClient, exercise_id, note, runtime_environme
         runtime_environment = preflight["environments"][0]
 
     if runtime_environment not in preflight["environments"]:
-        print('Selected runtime {} is not allowed by the preflight check.'.format(runtime_environment), file=sys.stderr)
+        print('Selected runtime {} is not allowed by the preflight check.'.format(
+            runtime_environment), file=sys.stderr)
         return
 
     submit_data = {
@@ -188,9 +216,11 @@ def _add_reference_solution(api: ApiClient, exercise_id, note, runtime_environme
     }
     variables = next((sv for sv in preflight['submitVariables'] if sv.get(
         "runtimeEnvironmentId") == runtime_environment), {}).get('variables', [])
-    entry_point = next((v for v in variables if v.get('name') == 'entry-point'), None)
+    entry_point = next(
+        (v for v in variables if v.get('name') == 'entry-point'), None)
     if entry_point is not None:
-        submit_data["solutionParams"] = {"variables": [{"name": "entry-point", "value": os.path.basename(files[0])}]}
+        submit_data["solutionParams"] = {"variables": [
+            {"name": "entry-point", "value": os.path.basename(files[0])}]}
 
     return api.create_reference_solution(exercise_id, submit_data)
 
@@ -205,7 +235,8 @@ def add_reference_solution(api: ApiClient, exercise_id, note, runtime_environmen
     if len(files) == 0:
         print('No files given.', file=sys.stderr)
         return
-    result = _add_reference_solution(api, exercise_id, note, runtime_environment, files)
+    result = _add_reference_solution(
+        api, exercise_id, note, runtime_environment, files)
     click.echo(result["referenceSolution"]["id"])
 
 
@@ -221,7 +252,8 @@ def evaluate_all_rs(api: ApiClient):
             try:
                 api.evaluate_reference_solutions(exercise["id"])
             except Exception as e:
-                logging.error("Error in exercise {}: {}".format(exercise["id"], str(e)))
+                logging.error("Error in exercise {}: {}".format(
+                    exercise["id"], str(e)))
 
 
 @cli.command()
@@ -235,7 +267,8 @@ def check_rs_evaluations(api: ApiClient, threshold):
     for exercise in api.get_exercises():
         solutions = api.get_reference_solutions(exercise["id"])
         if not solutions:
-            logging.error("Exercise %s has no reference solutions", exercise["id"])
+            logging.error(
+                "Exercise %s has no reference solutions", exercise["id"])
             continue
 
         found = False
@@ -257,9 +290,11 @@ def check_rs_evaluations(api: ApiClient, threshold):
 
         if not found_recent:
             if found:
-                logging.error("Exercise %s has no recent successful evaluations", exercise["id"])
+                logging.error(
+                    "Exercise %s has no recent successful evaluations", exercise["id"])
             else:
-                logging.error("Exercise %s has never had any successful evaluations", exercise["id"])
+                logging.error(
+                    "Exercise %s has never had any successful evaluations", exercise["id"])
 
 
 @cli.command()
@@ -281,6 +316,7 @@ def get_config(api: ApiClient, exercise_id, useJson):
     if useJson:
         json.dump(config, sys.stdout, sort_keys=True, indent=4)
     else:
+        yaml = YAML(typ="safe")
         yaml.dump(config, sys.stdout)
 
 
@@ -297,7 +333,8 @@ def set_config(api: ApiClient, exercise_id, file_name, useJson):
         if useJson:
             config = json.load(stream)
         else:
-            config = yaml.safe_load(stream)
+            yaml = YAML(typ="safe")
+            config = yaml.load(stream)
     api.update_exercise_config(exercise_id, config)
 
 
@@ -447,7 +484,8 @@ def fork(api: ApiClient, exercise_id, group_id, complete):
                 api.download_file(file["id"], path)
 
             if entry_point is not None:
-                file_names.insert(0, entry_point)  # make sure entry point is the first file on the list
+                # make sure entry point is the first file on the list
+                file_names.insert(0, entry_point)
 
             if len(file_names) > 0:
                 ref_res = _add_reference_solution(api, new_id, solution["description"],

@@ -1,5 +1,5 @@
 import json
-from ruamel import yaml
+from ruamel.yaml import YAML
 import sys
 import time
 
@@ -29,13 +29,16 @@ def get(api: ApiClient, assignment_id, useJson):
     if useJson is True:
         json.dump(assignment, sys.stdout, sort_keys=True, indent=4)
     elif useJson is False:
+        yaml = YAML(typ="safe")
         yaml.dump(assignment, sys.stdout)
     else:
         for localizedText in assignment["localizedTexts"]:
-            click.echo("{} {}".format(localizedText["locale"], localizedText["name"]))
+            click.echo("{} {}".format(
+                localizedText["locale"], localizedText["name"]))
         click.echo()
         for points in assignment["points"]:
-            click.echo("{} {} {}".format(points["awardeeId"], points["points"], points["note"]))
+            click.echo("{} {} {}".format(
+                points["awardeeId"], points["points"], points["note"]))
 
 
 @cli.command()
@@ -50,7 +53,8 @@ def create_points(api: ApiClient, assignment_id, user_id, points, note):
     """
 
     awarded_at = int(time.time())
-    api.create_shadow_assignment_points(assignment_id, user_id, points, note, awarded_at)
+    api.create_shadow_assignment_points(
+        assignment_id, user_id, points, note, awarded_at)
 
 
 @cli.command()

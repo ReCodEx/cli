@@ -2,7 +2,7 @@ import click
 import csv
 import sys
 import json
-from ruamel import yaml
+from ruamel.yaml import YAML
 
 from recodex.api import ApiClient
 from recodex.config import UserContext
@@ -39,13 +39,14 @@ def get(api: ApiClient, user_id, useJson):
     if useJson:
         json.dump(user, sys.stdout, sort_keys=True, indent=4)
     else:
+        yaml = YAML(typ="safe")
         yaml.dump(user, sys.stdout)
 
 
 @cli.command()
 @click.option("--json/--yaml", "useJson", default=None, help='Default is CSV.')
 @click.option('--only-active', 'onlyActive', is_flag=True, help='Return full records formated into CSV.')
-@click.option("search", "-s", default=None, help="Roles split by comma")
+@click.option("search", "-s", default=None, help="Substring to search")
 @click.option("roles", "-r", default=None, help="Roles split by comma")
 @pass_user_context
 @pass_api_client
@@ -57,7 +58,8 @@ def search(api: ApiClient, context: UserContext, search, roles, useJson, onlyAct
         roles = roles.split(',')
 
     users = []
-    instances_ids = api.get_user(context.user_id)["privateData"]["instancesIds"]
+    instances_ids = api.get_user(context.user_id)[
+        "privateData"]["instancesIds"]
     for instance_id in instances_ids:
         for user in api.search_users(instance_id, search, roles):
             if not onlyActive or user.get("privateData", {}).get("isAllowed", False):
@@ -66,10 +68,12 @@ def search(api: ApiClient, context: UserContext, search, roles, useJson, onlyAct
     if useJson is True:
         json.dump(users, sys.stdout, sort_keys=True, indent=4)
     elif useJson is False:
+        yaml = YAML(typ="safe")
         yaml.dump(users, sys.stdout)
     else:
         # print CSV header
-        fieldnames = ['id', 'title_before', 'first_name', 'last_name', 'title_after', 'avatar_url']
+        fieldnames = ['id', 'title_before', 'first_name',
+                      'last_name', 'title_after', 'avatar_url']
         csv_writer = csv.DictWriter(sys.stdout, fieldnames=fieldnames)
         csv_writer.writeheader()
 
@@ -92,13 +96,16 @@ def register(api: ApiClient, context: UserContext, email, first_name, last_name,
     Register new user with local account
     """
     if instance_id is None:
-        instances_ids = api.get_user(context.user_id)["privateData"]["instancesIds"]
+        instances_ids = api.get_user(context.user_id)[
+            "privateData"]["instancesIds"]
         if len(instances_ids) != 1:
-            click.echo("Instance ID is ambiguous. Provide explicit ID via --instance_id option.")
+            click.echo(
+                "Instance ID is ambiguous. Provide explicit ID via --instance_id option.")
             return
         instance_id = instances_ids[0]
 
-    res = api.register_user(instance_id, email, first_name, last_name, password)
+    res = api.register_user(
+        instance_id, email, first_name, last_name, password)
     user_id = res['user']['id']
     click.echo("User {id} ({first_name} {last_name}, {email}) registered in instance {instance_id}".format(
         id=user_id, first_name=first_name, last_name=last_name, email=email, instance_id=instance_id))

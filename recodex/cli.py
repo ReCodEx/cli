@@ -18,12 +18,16 @@ def cli(ctx: click.Context):
     """
     ReCodEx CLI
     """
+    sys.stdin.reconfigure(encoding='utf-8')
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
 
     config_dir = Path(appdirs.user_config_dir("recodex"))
     data_dir = Path(appdirs.user_data_dir("recodex"))
 
     context_path = data_dir / "context.yaml"
-    user_context = UserContext.load(context_path) if context_path.exists() else UserContext()
+    user_context = UserContext.load(
+        context_path) if context_path.exists() else UserContext()
     api_client = ApiClient(user_context.api_url, user_context.api_token)
 
     if user_context.api_token is not None and user_context.is_token_almost_expired() and not user_context.is_token_expired:

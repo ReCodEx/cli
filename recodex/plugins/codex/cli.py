@@ -2,7 +2,7 @@ import click
 import logging
 from pprint import pprint
 from pathlib import Path
-from ruamel import yaml
+from ruamel.yaml import YAML
 
 from recodex.decorators import pass_config_dir, pass_api_client
 from recodex.api import ApiClient
@@ -36,17 +36,20 @@ def details(api: ApiClient, exercise_folder):
     print()
 
     config = Config.load(Path.cwd() / "import-config.yml")
-    tests = load_codex_test_config(Path(exercise_folder) / "testdata" / "config")
+    tests = load_codex_test_config(
+        Path(exercise_folder) / "testdata" / "config")
     test_id_map = {test.name: test.number for test in tests}
     files = []
 
     print("### Exercise files")
     for name, path in load_exercise_files(exercise_folder):
         print(f"{path} as {name}")
-        files.append(name) # Make sure the file names are present in the exercise file list
+        # Make sure the file names are present in the exercise file list
+        files.append(name)
 
     print("### Exercise configuration")
-    pprint(make_exercise_config(config, soup, files, api.get_pipelines(), tests, test_id_map))
+    pprint(make_exercise_config(config, soup, files,
+           api.get_pipelines(), tests, test_id_map))
     print()
 
 
@@ -61,7 +64,8 @@ def name(exercise_folder):
 @cli.command()
 @click.argument("exercise_folder")
 def has_dir_test(exercise_folder):
-    tests = load_codex_test_config(Path(exercise_folder) / "testdata" / "config")
+    tests = load_codex_test_config(
+        Path(exercise_folder) / "testdata" / "config")
     for test in tests:
         if test.in_type == "dir":
             print(test.number, "in")
@@ -98,10 +102,13 @@ def get_id(api: ApiClient, exercise_folder):
 @click.argument("exercise_folder")
 @pass_api_client
 def set_score_config(api: ApiClient, exercise_id, exercise_folder):
-    tests = load_codex_test_config(Path(exercise_folder) / "testdata" / "config")
+    tests = load_codex_test_config(
+        Path(exercise_folder) / "testdata" / "config")
 
     score_config = {test.name: int(test.points) for test in tests}
-    api.set_exercise_score_config(exercise_id, yaml.dump({"testWeights": score_config}, default_flow_style=False))
+    yaml = YAML(typ="safe")
+    api.set_exercise_score_config(exercise_id, yaml.dump(
+        {"testWeights": score_config}, default_flow_style=False))
 
 
 @cli.command(name="import")
@@ -144,7 +151,8 @@ def run_import(config_dir: Path, api: ApiClient, exercise_folder, group_id, exer
 
     # Prepare the exercise text
     attachments = api.get_exercise_attachments(exercise_id)
-    url_map = {item["name"]: "{}/v1/uploaded-files/{}/download".format(api.api_url, item["id"]) for item in attachments}
+    url_map = {item["name"]: "{}/v1/uploaded-files/{}/download".format(
+        api.api_url, item["id"]) for item in attachments}
     text = replace_file_references(text, url_map)
 
     # Set the details of the new exercise
@@ -169,7 +177,8 @@ def run_import(config_dir: Path, api: ApiClient, exercise_folder, group_id, exer
     for name, path in load_exercise_files(exercise_folder):
         exercise_file_data[name] = upload_file(api, path, name)
 
-    api.add_exercise_files(exercise_id, [data["id"] for data in exercise_file_data.values()])
+    api.add_exercise_files(exercise_id, [data["id"]
+                           for data in exercise_file_data.values()])
     logging.info("Uploaded exercise files associated with the exercise")
 
     # Configure environments
@@ -187,10 +196,13 @@ def run_import(config_dir: Path, api: ApiClient, exercise_folder, group_id, exer
     logging.info("Added environments %s", ", ".join(environments))
 
     # Configure tests
-    tests = load_codex_test_config(Path(exercise_folder) / "testdata" / "config")
+    tests = load_codex_test_config(
+        Path(exercise_folder) / "testdata" / "config")
 
-    api.set_exercise_tests(exercise_id, [{"name": test.name} for test in tests])
-    test_id_map = {test["name"]: test["id"] for test in api.get_exercise_tests(exercise_id)}
+    api.set_exercise_tests(
+        exercise_id, [{"name": test.name} for test in tests])
+    test_id_map = {test["name"]: test["id"]
+                   for test in api.get_exercise_tests(exercise_id)}
     logging.info("Exercise tests configured")
 
     # Upload custom judges
@@ -200,10 +212,13 @@ def run_import(config_dir: Path, api: ApiClient, exercise_folder, group_id, exer
     if custom_judges:
         logging.info("Uploading custom judges")
         for judge in custom_judges:
-            judge_path = Path(exercise_folder).joinpath("testdata").joinpath(judge)
-            custom_judge_files[judge] = upload_file(api, judge_path, judge_path.name)
+            judge_path = Path(exercise_folder).joinpath(
+                "testdata").joinpath(judge)
+            custom_judge_files[judge] = upload_file(
+                api, judge_path, judge_path.name)
 
-        api.add_exercise_files(exercise_id, [data["id"] for data in custom_judge_files.values()])
+        api.add_exercise_files(
+            exercise_id, [data["id"] for data in custom_judge_files.values()])
         logging.info("Uploaded judge files associated with the exercise")
 
     exercise_config = make_exercise_config(
@@ -232,13 +247,16 @@ def run_import(config_dir: Path, api: ApiClient, exercise_folder, group_id, exer
                 "memory": test.limits[key].mem_limit
             }
 
-        api.update_limits(exercise_id, environment_id, hwgroup_id, limits_config)
+        api.update_limits(exercise_id, environment_id,
+                          hwgroup_id, limits_config)
         logging.info("Limits set for environment %s", environment_id)
 
     # Upload reference solutions
     for solution_id, solution in load_reference_solution_details(content_soup, config.extension_to_runtime):
-        path = load_reference_solution_file(solution_id, content_soup, exercise_folder)
+        path = load_reference_solution_file(
+            solution_id, content_soup, exercise_folder)
         solution["files"] = [upload_file(api, path)["id"]]
         payload = api.create_reference_solution(exercise_id, solution)
 
-        logging.info("New reference solution created, with id %s", payload["referenceSolution"]["id"])
+        logging.info("New reference solution created, with id %s",
+                     payload["referenceSolution"]["id"])

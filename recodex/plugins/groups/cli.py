@@ -1,5 +1,5 @@
 import json
-from ruamel import yaml
+from ruamel.yaml import YAML
 import sys
 
 import click
@@ -29,6 +29,7 @@ def all(api: ApiClient, useJson, archived):
     if useJson is True:
         json.dump(groups, sys.stdout, sort_keys=True, indent=4)
     elif useJson is False:
+        yaml = YAML(typ="safe")
         yaml.dump(groups, sys.stdout)
 
 
@@ -45,6 +46,7 @@ def detail(api: ApiClient, group_id, useJson):
     if useJson is True:
         json.dump(group, sys.stdout, sort_keys=True, indent=4)
     elif useJson is False:
+        yaml = YAML(typ="safe")
         yaml.dump(group, sys.stdout)
 
 
@@ -109,6 +111,7 @@ def students(api: ApiClient, group_id, useJson):
     if useJson is True:
         json.dump(students, sys.stdout, sort_keys=True, indent=4)
     elif useJson is False:
+        yaml = YAML(typ="safe")
         yaml.dump(students, sys.stdout)
     else:
         for student in students:
@@ -128,7 +131,9 @@ def assignments(api: ApiClient, group_id, useJson):
     if useJson is True:
         json.dump(assignments, sys.stdout, sort_keys=True, indent=4)
     elif useJson is False:
+        yaml = YAML(typ="safe")
         yaml.dump(assignments, sys.stdout)
     else:
         for assignment in assignments:
-            click.echo("{} {}".format(assignment["id"], get_localized_name(assignment["localizedTexts"])))
+            click.echo("{} {}".format(
+                assignment["id"], get_localized_name(assignment["localizedTexts"])))

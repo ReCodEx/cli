@@ -5,7 +5,7 @@
 Command line interface to the ReCodEx system.
 
 ## Requirements
-- Python 3.6+
+- Python 3.9+
 - See `requirements.txt`
 
 ## Installation

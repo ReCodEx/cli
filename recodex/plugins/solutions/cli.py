@@ -1,7 +1,7 @@
 import click
 import sys
 import json
-from ruamel import yaml
+from ruamel.yaml import YAML
 import datetime
 import pprint
 
@@ -29,6 +29,7 @@ def detail(api: ApiClient, solution_id, useJson):
     if useJson is True:
         json.dump(solution, sys.stdout, sort_keys=True, indent=4)
     elif useJson is False:
+        yaml = YAML(typ="safe")
         yaml.dump(solution, sys.stdout)
     else:
         pp = pprint.PrettyPrinter(indent=4)
@@ -60,6 +61,7 @@ def get_files(api: ApiClient, solution_id, useJson):
     if useJson is True:
         json.dump(files, sys.stdout, sort_keys=True, indent=4)
     elif useJson is False:
+        yaml = YAML(typ="safe")
         yaml.dump(files, sys.stdout)
     else:
         pp = pprint.PrettyPrinter(indent=4)
@@ -80,10 +82,12 @@ def get_comments(api: ApiClient, solution_id, useJson):
     if useJson is True:
         json.dump(comments["comments"], sys.stdout, sort_keys=True, indent=4)
     elif useJson is False:
+        yaml = YAML(typ="safe")
         yaml.dump(comments["comments"], sys.stdout)
     else:
         for comment in comments["comments"]:
-            posted = datetime.datetime.fromtimestamp(comment["postedAt"]).strftime('%Y-%m-%d %H:%M:%S')
+            posted = datetime.datetime.fromtimestamp(
+                comment["postedAt"]).strftime('%Y-%m-%d %H:%M:%S')
             click.echo("\n>>> {} at {} ({}) [{}]:".format(comment["user"]["name"],
                        posted, "private" if comment["isPrivate"] else "public", comment["id"]))
             click.echo(comment["text"])

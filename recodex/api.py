@@ -62,6 +62,9 @@ class ApiClient:
             url += "&locale={}".format(urllib.parse.quote_plus(locale))
         return self.get(url)["items"]
 
+    def get_reference_solution(self, solution_id):
+        return self.get("/reference-solutions/{}".format(solution_id))
+
     def get_reference_solutions(self, exercise_id):
         return self.get("/reference-solutions/exercise/{}".format(exercise_id))
 
