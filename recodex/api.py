@@ -333,6 +333,12 @@ class ApiClient:
     def delete_solution(self, solution_id):
         return self.delete("assignment-solutions/{}".format(solution_id))
 
+    def create_assignment(self, exercise_id, group_id):
+        return self.post("exercise-assignments", data={"exerciseId": exercise_id, "groupId": group_id})
+
+    def set_assignment(self, assignment_id, **data):
+        return self.post("exercise-assignments/{}".format(assignment_id), data=data)
+
     # Shadow Assignments
 
     def create_shadow_assignment(self, group_id):
