@@ -365,7 +365,8 @@ class ApiClient:
 
     def update_shadow_assignment_points(self, points_id, points, note,
                                         awarded_at=None):
-        return self.post("/shadow-assignments/points/{}".format(points_id), data={
+        return self.post("/shadow-assignments/points/{}".format(points_id),
+                         data={
             'points': points,
             'note': note,
             'awardedAt': awarded_at,
@@ -377,13 +378,23 @@ class ApiClient:
     # Plagiarisms
 
     def create_plagiarism_batch(self, tool, tool_params=None):
-        return self.post('/plagiarism', data={"detectionTool": tool, "detectionToolParams": tool_params})
+        return self.post('/plagiarism', data={
+            "detectionTool": tool,
+            "detectionToolParams": tool_params,
+        })
 
-    def update_plagiarism_batch(self, id, upload_completed):
-        return self.post('/plagiarism/{}'.format(id), data={"uploadCompleted": upload_completed})
+    def update_plagiarism_batch(self, id, upload_completed=None,
+                                assignments=None):
+        data = {}
+        if upload_completed is not None:
+            data["uploadCompleted"] = upload_completed
+        if assignments is not None:
+            data["assignments"] = assignments
+        return self.post('/plagiarism/{}'.format(id), data=data)
 
     def add_plagiarism_detected_similarity(self, id, solution_id, data):
-        return self.post('/plagiarism/{}/{}'.format(id, solution_id), data=data)
+        return self.post('/plagiarism/{}/{}'.format(id, solution_id),
+                         data=data)
 
     # Misc
 

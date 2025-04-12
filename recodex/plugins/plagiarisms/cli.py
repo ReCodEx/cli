@@ -28,13 +28,24 @@ def create_batch(api: ApiClient, tool, tool_params):
 
 @cli.command()
 @click.argument("id")
-@click.option("--upload-completed/--upload-reopen", "completed", default=True)
+@click.option("--upload-completed/--upload-reopen", "completed", default=None)
+@click.option("--assignments", "assignments", is_flag=True)
 @pass_api_client
-def update_batch(api: ApiClient, id, completed):
+def update_batch(api: ApiClient, id, completed, assignments):
     """
-    Update a plagiarism detection batch (whether its upload has been completed)
+    Update a plagiarism detection batch (whether its upload has been completed).
+    Mark assignments as checked by the batch.
     """
-    api.update_plagiarism_batch(id, completed)
+    ids = None
+    if assignments:
+        ids = []
+        data = sys.stdin.read()
+        for token in data.split():
+            token = token.strip()
+            if token:
+                ids.append(token)
+
+    api.update_plagiarism_batch(id, completed, ids)
 
 
 @cli.command()
