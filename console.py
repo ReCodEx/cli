@@ -37,7 +37,7 @@ def call(
     Raises:
         typer.Exit: Thrown when the argument or options are invalid.
     """
-    client = getClient()
+    client = clientFactory.getClient()
     if endpoint.count(".") != 1:
         typer.echo("The endpoint needs to be in <presenter.handler> format.")
         raise typer.Exit(1)
