@@ -1,8 +1,12 @@
 import typer
+import click
 from typing_extensions import Annotated
 import json
+import sys
+from collections.abc import Callable
 
 import clientFactory
+import commands
 
 app = typer.Typer()
 
@@ -29,6 +33,9 @@ def call(
     body: Annotated[
         str, typer.Option(help="JSON Body", rich_help_panel="Request Parameters")
     ] = "{}",
+    verbose: Annotated[
+        bool, typer.Option(help="Execution Verbosity")
+    ] = False,
 ):
     """Calls a ReCodEx endpoint with the provided parameters.
         Requires an endpoint identifier in <presenter.handler> format.
@@ -37,23 +44,19 @@ def call(
     Raises:
         typer.Exit: Thrown when the argument or options are invalid.
     """
-    client = clientFactory.getClient()
-    if endpoint.count(".") != 1:
-        typer.echo("The endpoint needs to be in <presenter.handler> format.")
-        raise typer.Exit(1)
-    
-    try:
-        path_parsed = json.loads(path)
-        query_parsed = json.loads(query)
-        body_parsed = json.loads(body)
-    except:
-        typer.echo("The JSON string is corrupted.")
-        raise typer.Exit(1)
 
-    presenter, handler = endpoint.split(".")
-    response = client.send_request(presenter, handler, body_parsed, path_parsed, query_parsed)
-    print(response.data)
+    command = lambda: commands.call(endpoint, path, query, body)
+    execute_with_verbosity(command, verbose)
     
+def execute_with_verbosity(command: Callable[[], None], verbose: bool):
+    if verbose:
+        command()
+    else:
+        try:
+            command()
+        except Exception as e:
+            raise click.ClickException(str(e))
+
 if __name__ == "__main__":
     app()
     ###TODO: handle files
