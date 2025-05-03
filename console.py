@@ -27,9 +27,12 @@ def call(
     path: Annotated[
         str, typer.Option(help="Path Parameters", rich_help_panel="Request Parameters")
     ] = "{}",
-    query: Annotated[
+    query_json: Annotated[
         str, typer.Option(help="Query Parameters", rich_help_panel="Request Parameters")
     ] = "{}",
+    query: Annotated[
+        list[str], typer.Option(help="Query Parameters", rich_help_panel="Request Parameters", allow_dash=True)
+    ] = [],
     body: Annotated[
         str, typer.Option(help="JSON Body", rich_help_panel="Request Parameters")
     ] = "{}",
@@ -38,14 +41,13 @@ def call(
     ] = False,
 ):
     """Calls a ReCodEx endpoint with the provided parameters.
-        Requires an endpoint identifier in <presenter.handler> format.
-        Use --path, --query, and --body options to pass a json string representing the parameters.
-
-    Raises:
-        typer.Exit: Thrown when the argument or options are invalid.
+    Requires an endpoint identifier in <presenter.handler> format.
+    Use --path, --query, and --body options to pass a json string representing the parameters.
     """
 
-    command = lambda: commands.call(endpoint, path, query, body)
+    print(query)
+
+    command = lambda: commands.call(endpoint, path, query_json, body)
     execute_with_verbosity(command, verbose)
     
 def execute_with_verbosity(command: Callable[[], None], verbose: bool):
