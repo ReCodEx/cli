@@ -1,12 +1,19 @@
 import typer
 import click
+from rich.console import Console
+from rich.panel import Panel
+import typer.cli
+import typer.core
+import typer.utils
 from typing_extensions import Annotated
+import typing
 import json
 import sys
 from collections.abc import Callable
 
 from recodex_cli_lib import client_factory
 from recodex_cli_lib.endpoint_resolver import EndpointResolver
+from recodex_cli_lib.client import Client
 import call_command
 
 app = typer.Typer()
@@ -37,26 +44,35 @@ def call(
     verbose: Annotated[
         bool, typer.Option(help="Execution Verbosity")
     ] = False,
+    help: Annotated[
+        bool, typer.Option(help="Display Help")
+    ] = False,
 ):
     """Calls a ReCodEx endpoint with the provided parameters.
     Requires an endpoint identifier in <presenter.handler> format.
     Use --path, --query, and --body options to pass a json string representing the parameters.
     """
-    state["verbose"] = verbose
-    client = client_factory.get_client_interactive()
 
-    if endpoint == "":
-        command = lambda: call_command.call_interactive(client)
+    state["verbose"] = verbose
+    client = get_client_with_verbosity()
+
+    if help:
+        command = lambda: call_command.print_help_for_endpoint(endpoint)
+    elif endpoint == "":
+        command = lambda: call_command.call_interactive(client, verbose)
     else:
         #TODO: handle other params
         parsed_body = call_command.parse_json(body)
-        command = lambda: call_command.call(client, endpoint, {}, {}, parsed_body)
+        command = lambda: call_command.call(client, endpoint, {}, {}, parsed_body, verbose)
 
     execute_with_verbosity(command)
 
-def execute_with_verbosity(command: Callable[[], None]):
+def get_client_with_verbosity() -> Client:
+    return execute_with_verbosity(client_factory.get_client_interactive)
+
+def execute_with_verbosity(command: Callable[[], typing.Any]):
     try:
-        command()
+        return command()
     except Exception as e:
         if state["verbose"]:
             raise e
