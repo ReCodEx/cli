@@ -6,6 +6,10 @@ import json
 import inquirer
 from rich.console import Console
 from rich.panel import Panel
+import click
+import typing
+from collections.abc import Callable
+
 
 def parse_json(json_string):
     try:
@@ -45,14 +49,14 @@ def print_help_for_endpoint(endpoint: str):
 
     path_params = endpoint_resolver.get_path_params(presenter, handler)
     if (len(path_params) > 0):
-        console.print(get_param_panel(path_params, "Path Parameters"))
+        console.print(get_param_panel(path_params, "Path Parameters Detail"))
 
     query_params = endpoint_resolver.get_query_params(presenter, handler)
     if (len(query_params) > 0):
-        console.print(get_param_panel(query_params, "Query Parameters"))
+        console.print(get_param_panel(query_params, "Query Parameters Detail"))
 
     if endpoint_resolver.endpoint_has_body(presenter, handler):
-        console.print(create_panel("The endpoint expects a JSON body.", "Body"))
+        console.print(create_panel("The endpoint expects a JSON body.", "Body Detail"))
 
 def get_param_panel(params: list[dict], title):
     rows_tokenized = []
@@ -76,6 +80,8 @@ def __add_text_token(texts: list[str], token_dicts: list[dict[str, str]], token_
             max_len = len(text)
 
     for i in range(len(texts)):
+        if token_key not in token_dicts[i]:
+            continue
         # append texts with spaces
         texts[i] += " " * (max_len - len(texts[i]))
         # add token
@@ -167,4 +173,29 @@ def prompt_param_values(params):
 
     return param_values
 
-    
+def execute_with_verbosity(command: Callable[[], typing.Any], verbose: bool):
+    try:
+        return command()
+    except Exception as e:
+        if verbose:
+            raise e
+        else:
+            raise click.ClickException(str(e))
+
+def help_callback(ctx: click.Context, _, display_help: bool):
+    if not display_help:
+        return display_help
+
+    # display default help
+    ctx.command.format_help(ctx, ctx.make_formatter())
+
+    endpoint = ctx.params['endpoint']
+    verbose = ctx.params['verbose']
+    if endpoint != "":
+        def command():
+            # check whether the endpoint is valid
+            parse_endpoint_or_throw(endpoint)
+            # display custom help for the endpoint
+            print_help_for_endpoint(endpoint)
+        execute_with_verbosity(command, verbose)
+    return display_help
