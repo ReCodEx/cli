@@ -27,15 +27,16 @@ def call_interactive(client: Client, verbose: bool):
     
     call(client, endpoint, path_param_values, query_param_values, body, verbose)
 
-def call(client: Client, endpoint: str, path_values: list[str], query_param_values: dict[str, str], body: dict, verbose: bool):
+def call(client: Client, endpoint: str, path_values: list[str], query_values: list[str], body: dict, verbose: bool):
     presenter, handler = parse_endpoint_or_throw(endpoint)
 
-    # parse path params
+    # parse params
     path_dict = path_list_to_dict(client.endpoint_resolver, presenter, handler, path_values)
+    query_dict = query_list_to_dict(client.endpoint_resolver, presenter, handler, query_values)
 
     if verbose:
         typer.echo("Sending Request...")
-    response = client.send_request(presenter, handler, body, path_dict, query_param_values)
+    response = client.send_request(presenter, handler, body, path_dict, query_dict)
     print(response.headers)
 
 def parse_endpoint_or_throw(endpoint: str):
@@ -52,20 +53,39 @@ def path_list_to_dict(endpoint_resolver: EndpointResolver, presenter: str, handl
     # check if the number of provided params matches the definitions
     if len(path_params) < len(path_values):
         plural_s = "s" if len(path_params) > 1 else ''
-        raise click.ClickException(f"Expected {len(path_params)} PATH parameter{plural_s}, but got {len(path_values)}.")
+        raise Exception(f"Expected {len(path_params)} PATH parameter{plural_s}, but got {len(path_values)}.")
     elif len(path_params) > len(path_values):
         missing_params = []
         for i in range(len(path_values), len(path_params)):
-            missing_params.append(path_params[i]["name"])
+            missing_params.append(path_params[i]["python_name"])
         params_text = ", ".join(missing_params)
         plural_text = "s are" if len(missing_params) > 1 else ' is'
-        raise click.ClickException(f"The following PATH parameter{plural_text} missing: {params_text}.")
+        raise Exception(f"The following PATH parameter{plural_text} missing: {params_text}.")
 
     # construct param_name->param_value dict
     path_dict = {}
     for i in range(len(path_params)):
-        path_dict[path_params[i]["name"]] = path_values[i]
+        path_dict[path_params[i]["python_name"]] = path_values[i]
     return path_dict
+
+def query_list_to_dict(endpoint_resolver: EndpointResolver, presenter: str, handler: str, query_values: list[str]) -> dict[str, str]:
+    query_dict = {}
+    for query_value in query_values:
+        if query_value.count("=") != 1:
+            raise Exception("The query values need to be in <name=value> format.")
+
+        name, value = query_value.split("=")
+        query_param = endpoint_resolver.get_query_param(presenter, handler, name)
+        if not query_param or name != query_param["python_name"]:
+            raise Exception(f"Unknown QUERY parameter: {name}.")
+
+        # handle arrays
+        if query_param["schema"]["type"] == "array":
+            # arrays are delimited with commas
+            value = value.split(",")
+        
+        query_dict[name] = value
+    return query_dict
 
 def print_help_for_endpoint(endpoint: str):
     #TODO: handle no endpoint specified help
@@ -91,7 +111,7 @@ def get_param_panel(params: list[dict], title):
 
     rows = ["" for i in range(len(rows_tokenized))]
 
-    __add_text_token(rows, rows_tokenized, "name")
+    __add_text_token(rows, rows_tokenized, "python_name")
     __add_text_token(rows, rows_tokenized, "type")
     __add_text_token(rows, rows_tokenized, "opt")
     __add_text_token(rows, rows_tokenized, "desc")
@@ -161,7 +181,7 @@ def prompt_request_data(endpoint_resolver: EndpointResolver, presenter: str, han
 
 def get_param_info_text_tokens(param: dict):
     # get info
-    name = param["name"]
+    name = param["python_name"]
     desc = param["description"]
     type = param["schema"]["type"]
     if param["schema"]["nullable"]:
@@ -169,7 +189,7 @@ def get_param_info_text_tokens(param: dict):
     required = param["required"]
 
     tokens = {
-        "name": name,
+        "python_name": name,
         "type": f"[{type}]",
     }
     if not required:
@@ -183,7 +203,7 @@ def prompt_param_values(params):
     for param in params:
         prompt_tokens = get_param_info_text_tokens(param)
         prompt = " ".join(prompt_tokens.values())
-        name = param["name"]
+        name = param["python_name"]
         required = param["required"]
 
         # get prompt value
