@@ -27,11 +27,15 @@ def call_interactive(client: Client, verbose: bool):
     
     call(client, endpoint, path_param_values, query_param_values, body, verbose)
 
-def call(client: Client, endpoint: str, path_param_values: dict[str, str], query_param_values: dict[str, str], body: dict, verbose: bool):
+def call(client: Client, endpoint: str, path_values: list[str], query_param_values: dict[str, str], body: dict, verbose: bool):
     presenter, handler = parse_endpoint_or_throw(endpoint)
+
+    # parse path params
+    path_dict = path_list_to_dict(client.endpoint_resolver, presenter, handler, path_values)
+
     if verbose:
         typer.echo("Sending Request...")
-    response = client.send_request(presenter, handler, body, path_param_values, query_param_values)
+    response = client.send_request(presenter, handler, body, path_dict, query_param_values)
     print(response.headers)
 
 def parse_endpoint_or_throw(endpoint: str):
@@ -40,6 +44,28 @@ def parse_endpoint_or_throw(endpoint: str):
 
     presenter, handler = endpoint.split(".")
     return presenter, handler
+
+def path_list_to_dict(endpoint_resolver: EndpointResolver, presenter: str, handler: str, path_values: list[str]) -> dict[str, str]:
+    # get param definitions
+    path_params = endpoint_resolver.get_path_params(presenter, handler)
+
+    # check if the number of provided params matches the definitions
+    if len(path_params) < len(path_values):
+        plural_s = "s" if len(path_params) > 1 else ''
+        raise click.ClickException(f"Expected {len(path_params)} PATH parameter{plural_s}, but got {len(path_values)}.")
+    elif len(path_params) > len(path_values):
+        missing_params = []
+        for i in range(len(path_values), len(path_params)):
+            missing_params.append(path_params[i]["name"])
+        params_text = ", ".join(missing_params)
+        plural_text = "s are" if len(missing_params) > 1 else ' is'
+        raise click.ClickException(f"The following PATH parameter{plural_text} missing: {params_text}.")
+
+    # construct param_name->param_value dict
+    path_dict = {}
+    for i in range(len(path_params)):
+        path_dict[path_params[i]["name"]] = path_values[i]
+    return path_dict
 
 def print_help_for_endpoint(endpoint: str):
     #TODO: handle no endpoint specified help

@@ -65,7 +65,7 @@ def call(
     else:
         #TODO: handle other params
         parsed_body = call_command.parse_json(body)
-        command = lambda: call_command.call(client, endpoint, {}, {}, parsed_body, verbose)
+        command = lambda: call_command.call(client, endpoint, path, {}, parsed_body, verbose)
 
     execute_with_verbosity(command)
 
