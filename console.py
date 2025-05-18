@@ -1,22 +1,12 @@
 import typer
-import click
-from rich.console import Console
-from rich.panel import Panel
-import typer.cli
-import typer.core
-import typer.utils
 from typing_extensions import Annotated
-import json
-import sys
 import typing
 from collections.abc import Callable
 
-import inspect
-
 from recodex_cli_lib import client_factory
-from recodex_cli_lib.endpoint_resolver import EndpointResolver
 from recodex_cli_lib.client import Client
-import call_command
+import call_command.command as command
+import call_command.cmd_utils as cmd_utils
 
 app = typer.Typer()
 state = { "verbose" : False }
@@ -45,7 +35,7 @@ def call(
         bool, typer.Option(help="Execution Verbosity", is_eager=True)
     ] = False,
     help: Annotated[
-        bool, typer.Option(help="Display Help", callback=call_command.help_callback)
+        bool, typer.Option(help="Display Help", callback=command.help_callback)
     ] = False,
 ):
     """Calls a ReCodEx endpoint with the provided parameters.
@@ -61,11 +51,11 @@ def call(
     client = get_client_with_verbosity()
 
     if endpoint == "":
-        command = lambda: call_command.call_interactive(client, verbose)
+        command = lambda: command.call_interactive(client, verbose)
     else:
         #TODO: handle other params
-        parsed_body = call_command.parse_json(body)
-        command = lambda: call_command.call(client, endpoint, path, query, parsed_body, verbose)
+        parsed_body = command.parse_json(body)
+        command = lambda: command.call(client, endpoint, path, query, parsed_body, verbose)
 
     execute_with_verbosity(command)
 
@@ -73,7 +63,7 @@ def get_client_with_verbosity() -> Client:
     return execute_with_verbosity(client_factory.get_client_interactive)
 
 def execute_with_verbosity(command: Callable[[], typing.Any]):
-    return call_command.execute_with_verbosity(command, state["verbose"])
+    return cmd_utils.execute_with_verbosity(command, state["verbose"])
 
 if __name__ == "__main__":
     app()

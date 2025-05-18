@@ -1,21 +1,11 @@
-from recodex_cli_lib import client_factory
-from recodex_cli_lib.endpoint_resolver import EndpointResolver
 from recodex_cli_lib.client import Client
+from recodex_cli_lib.endpoint_resolver import EndpointResolver
 import typer
-import json
 import inquirer
-from rich.console import Console
-from rich.panel import Panel
 import click
-import typing
-from collections.abc import Callable
 
-
-def parse_json(json_string):
-    try:
-        return json.loads(json_string)
-    except:
-        raise Exception("The JSON string is corrupted.")
+import call_command.cmd_utils as cmd_utils
+from call_command.help_printer import HelpPrinter
 
 def call_interactive(client: Client, verbose: bool):
     # start an interactive prompt if there is no endpoint
@@ -23,12 +13,12 @@ def call_interactive(client: Client, verbose: bool):
     presenter, handler = prompt_endpoint(endpoint_resolver)
     endpoint = f"{presenter}.{handler}"
     path_param_values, query_param_values, body_string = prompt_request_data(endpoint_resolver, presenter, handler)
-    body = parse_json(body_string)
+    body = cmd_utils.parse_json(body_string)
     
     call(client, endpoint, path_param_values, query_param_values, body, verbose)
 
 def call(client: Client, endpoint: str, path_values: list[str], query_values: list[str], body: dict, verbose: bool):
-    presenter, handler = parse_endpoint_or_throw(endpoint)
+    presenter, handler = cmd_utils.parse_endpoint_or_throw(endpoint)
 
     # parse params
     path_dict = path_list_to_dict(client.endpoint_resolver, presenter, handler, path_values)
@@ -38,13 +28,6 @@ def call(client: Client, endpoint: str, path_values: list[str], query_values: li
         typer.echo("Sending Request...")
     response = client.send_request(presenter, handler, body, path_dict, query_dict)
     print(response.headers)
-
-def parse_endpoint_or_throw(endpoint: str):
-    if endpoint.count(".") != 1:
-        raise Exception("The endpoint needs to be in <presenter.handler> format.")
-
-    presenter, handler = endpoint.split(".")
-    return presenter, handler
 
 def path_list_to_dict(endpoint_resolver: EndpointResolver, presenter: str, handler: str, path_values: list[str]) -> dict[str, str]:
     # get param definitions
@@ -87,64 +70,6 @@ def query_list_to_dict(endpoint_resolver: EndpointResolver, presenter: str, hand
         query_dict[name] = value
     return query_dict
 
-def print_help_for_endpoint(endpoint: str):
-    #TODO: handle no endpoint specified help
-    presenter, handler = parse_endpoint_or_throw(endpoint)
-    endpoint_resolver = EndpointResolver()
-    console = Console()
-
-    path_params = endpoint_resolver.get_path_params(presenter, handler)
-    if (len(path_params) > 0):
-        console.print(get_param_panel(path_params, "Path Parameters Detail"))
-
-    query_params = endpoint_resolver.get_query_params(presenter, handler)
-    if (len(query_params) > 0):
-        console.print(get_param_panel(query_params, "Query Parameters Detail"))
-
-    if endpoint_resolver.endpoint_has_body(presenter, handler):
-        console.print(create_panel("The endpoint expects a JSON body.", "Body Detail"))
-
-def get_param_panel(params: list[dict], title):
-    rows_tokenized = []
-    for param in params:
-        rows_tokenized.append(get_param_info_text_tokens(param))
-
-    rows = ["" for i in range(len(rows_tokenized))]
-
-    __add_text_token(rows, rows_tokenized, "python_name")
-    __add_text_token(rows, rows_tokenized, "type")
-    __add_text_token(rows, rows_tokenized, "opt")
-    __add_text_token(rows, rows_tokenized, "desc")
-
-    text = "\n".join(rows)
-    return create_panel(text, title)
-
-def __add_text_token(texts: list[str], token_dicts: list[dict[str, str]], token_key: str):
-    max_len = 0
-    for text in texts:
-        if len(text) > max_len:
-            max_len = len(text)
-
-    for i in range(len(texts)):
-        if token_key not in token_dicts[i]:
-            continue
-        # append texts with spaces
-        texts[i] += " " * (max_len - len(texts[i]))
-        # add token
-        texts[i] += f" {token_dicts[i][token_key]}"
-
-
-def create_panel(text: str, title: str):
-        # escape opening brackets
-        text = text.replace("[", "\[")
-
-        return Panel(
-        text,
-        border_style="dim",
-        title=title,
-        title_align="left",
-    )
-
 def prompt_endpoint(endpoint_resolver: EndpointResolver):
     presenter_choices = endpoint_resolver.get_presenters()
     question = [
@@ -179,29 +104,10 @@ def prompt_request_data(endpoint_resolver: EndpointResolver, presenter: str, han
 
     return path_param_values, query_param_values, json_string
 
-def get_param_info_text_tokens(param: dict):
-    # get info
-    name = param["python_name"]
-    desc = param["description"]
-    type = param["schema"]["type"]
-    if param["schema"]["nullable"]:
-        type += "|null"
-    required = param["required"]
-
-    tokens = {
-        "python_name": name,
-        "type": f"[{type}]",
-    }
-    if not required:
-        tokens["opt"] = "[OPT]"
-    tokens["desc"] = desc
-
-    return tokens
-
 def prompt_param_values(params):
     param_values = {}
     for param in params:
-        prompt_tokens = get_param_info_text_tokens(param)
+        prompt_tokens = cmd_utils.get_param_info_text_tokens(param)
         prompt = " ".join(prompt_tokens.values())
         name = param["python_name"]
         required = param["required"]
@@ -219,15 +125,6 @@ def prompt_param_values(params):
 
     return param_values
 
-def execute_with_verbosity(command: Callable[[], typing.Any], verbose: bool):
-    try:
-        return command()
-    except Exception as e:
-        if verbose:
-            raise e
-        else:
-            raise click.ClickException(str(e))
-
 def help_callback(ctx: click.Context, _, display_help: bool):
     if not display_help:
         return display_help
@@ -237,11 +134,7 @@ def help_callback(ctx: click.Context, _, display_help: bool):
 
     endpoint = ctx.params['endpoint']
     verbose = ctx.params['verbose']
-    if endpoint != "":
-        def command():
-            # check whether the endpoint is valid
-            parse_endpoint_or_throw(endpoint)
-            # display custom help for the endpoint
-            print_help_for_endpoint(endpoint)
-        execute_with_verbosity(command, verbose)
+
+    help_printer = HelpPrinter()
+    help_printer.print(ctx, endpoint, verbose)
     return display_help
