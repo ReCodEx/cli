@@ -13,15 +13,15 @@ class HelpPrinter:
 
         rows = ["" for i in range(len(rows_tokenized))]
 
-        self.__add_text_token(rows, rows_tokenized, "python_name")
-        self.__add_text_token(rows, rows_tokenized, "type")
-        self.__add_text_token(rows, rows_tokenized, "opt")
+        self.__add_text_token(rows, rows_tokenized, "python_name", "bright_cyan")
+        self.__add_text_token(rows, rows_tokenized, "type", "yellow")
+        self.__add_text_token(rows, rows_tokenized, "opt", "magenta")
         self.__add_text_token(rows, rows_tokenized, "desc")
 
         text = "\n".join(rows)
         return self.__create_panel(text, title)
     
-    def __add_text_token(self, texts: list[str], token_dicts: list[dict[str, str]], token_key: str):
+    def __add_text_token(self, texts: list[str], token_dicts: list[dict[str, str]], token_key: str, color: str = "white"):
         max_len = 0
         for text in texts:
             if len(text) > max_len:
@@ -33,7 +33,7 @@ class HelpPrinter:
             # append texts with spaces
             texts[i] += " " * (max_len - len(texts[i]))
             # add token
-            texts[i] += f" {token_dicts[i][token_key]}"
+            texts[i] += click.style(f" {token_dicts[i][token_key]}", color)
 
     def __create_panel(self, text: str, title: str):
         # escape opening brackets
@@ -71,6 +71,9 @@ class HelpPrinter:
     def print(self, ctx: click.Context, endpoint: str, verbose: bool):
         self.__prepare(ctx, endpoint, verbose)
         self.ctx.command.format_help(self.ctx, self.formatter)
+
+        # with self.formatter.section("Test"):
+        #     self.formatter.write_dl([("test", "val")])
 
         if self.print_detail:
             if self.path_panel:

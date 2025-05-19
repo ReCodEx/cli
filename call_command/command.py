@@ -129,9 +129,6 @@ def help_callback(ctx: click.Context, _, display_help: bool):
     if not display_help:
         return display_help
 
-    # display default help
-    ctx.command.format_help(ctx, ctx.make_formatter())
-
     endpoint = ctx.params['endpoint']
     verbose = ctx.params['verbose']
 
