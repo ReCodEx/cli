@@ -33,11 +33,13 @@ class HelpPrinter:
             # append texts with spaces
             texts[i] += " " * (max_len - len(texts[i]))
             # add token
-            texts[i] += click.style(f" {token_dicts[i][token_key]}", color)
+            token = f" {token_dicts[i][token_key]}".replace("[", "\[")
+            # add token color
+            token = f"[{color}]{token}[/{color}]"
+            texts[i] += token
 
     def __create_panel(self, text: str, title: str):
         # escape opening brackets
-        text = text.replace("[", "\[")
 
         return Panel(
             text,
