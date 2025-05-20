@@ -27,7 +27,7 @@ def call(client: Client, endpoint: str, path_values: list[str], query_values: li
     if verbose:
         typer.echo("Sending Request...")
     response = client.send_request(presenter, handler, body, path_dict, query_dict)
-    print(response.headers)
+    print(response.data)
 
 def path_list_to_dict(endpoint_resolver: EndpointResolver, presenter: str, handler: str, path_values: list[str]) -> dict[str, str]:
     # get param definitions

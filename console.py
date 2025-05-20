@@ -5,7 +5,7 @@ from collections.abc import Callable
 
 from recodex_cli_lib import client_factory
 from recodex_cli_lib.client import Client
-import call_command.command as command
+import call_command.command as cmd
 import call_command.cmd_utils as cmd_utils
 
 app = typer.Typer()
@@ -35,7 +35,7 @@ def call(
         bool, typer.Option(help="Execution Verbosity", is_eager=True)
     ] = False,
     help: Annotated[
-        bool, typer.Option(help="Display Help", callback=command.help_callback)
+        bool, typer.Option(help="Display Help", callback=cmd.help_callback)
     ] = False,
 ):
     """Calls a ReCodEx endpoint with the provided parameters.
@@ -51,11 +51,12 @@ def call(
     client = get_client_with_verbosity()
 
     if endpoint == "":
-        command = lambda: command.call_interactive(client, verbose)
+        command = lambda: cmd.call_interactive(client, verbose)
     else:
-        #TODO: handle other params
-        parsed_body = command.parse_json(body)
-        command = lambda: command.call(client, endpoint, path, query, parsed_body, verbose)
+        def command():
+            #TODO: handle other params
+            parsed_body = cmd_utils.parse_json(body)
+            cmd.call(client, endpoint, path, query, parsed_body, verbose)
 
     execute_with_verbosity(command)
 
