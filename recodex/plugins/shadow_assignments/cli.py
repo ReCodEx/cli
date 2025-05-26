@@ -88,7 +88,7 @@ def create_points(api: ApiClient, assignment_id, user_id, points, note):
 
     awarded_at = int(time.time())
     api.create_shadow_assignment_points(
-        assignment_id, user_id, points, note, awarded_at)
+        assignment_id, user_id, int(points), note, awarded_at)
 
 
 @cli.command()
@@ -102,7 +102,8 @@ def update_points(api: ApiClient, points_id, points, note):
     """
 
     awarded_at = int(time.time())
-    api.update_shadow_assignment_points(points_id, points, note, awarded_at)
+    api.update_shadow_assignment_points(points_id, int(points), note,
+                                        awarded_at)
 
 
 @cli.command()
