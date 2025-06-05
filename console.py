@@ -1,4 +1,5 @@
 import typer
+from typer_shell import make_typer_shell
 from typing_extensions import Annotated
 import typing
 from collections.abc import Callable
@@ -8,7 +9,7 @@ from recodex_cli_lib.client import Client
 import call_command.command as cmd
 import call_command.cmd_utils as cmd_utils
 
-app = typer.Typer()
+app = make_typer_shell(prompt="ReCodEx CLI: ")
 state = { "verbose" : False }
 
 @app.command()
