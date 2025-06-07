@@ -4,7 +4,7 @@ from typing_extensions import Annotated
 import typing
 from collections.abc import Callable
 
-from recodex_cli_lib import client_factory
+from utils import client_factory
 from recodex_cli_lib.client import Client
 import call_command.command as cmd
 import call_command.cmd_utils as cmd_utils
@@ -15,7 +15,7 @@ state = { "verbose" : False }
 @app.command()
 def swagger(
 ):
-    client = client_factory.get_client_interactive()
+    client = get_client_with_verbosity()
     print(client.endpoint_resolver.get_swagger())
 
 @app.command()
@@ -61,8 +61,9 @@ def call(
 
     execute_with_verbosity(command)
 
+
 def get_client_with_verbosity() -> Client:
-    return execute_with_verbosity(client_factory.get_client_interactive)
+    return execute_with_verbosity(client_factory.get_client)
 
 def execute_with_verbosity(command: Callable[[], typing.Any]):
     return cmd_utils.execute_with_verbosity(command, state["verbose"])
