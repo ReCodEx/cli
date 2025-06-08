@@ -10,7 +10,7 @@ import call_command.command as cmd
 import call_command.cmd_utils as cmd_utils
 from call_command.command_state import CommandState
 
-app = make_typer_shell(prompt="ReCodEx CLI: ")
+app = make_typer_shell(prompt="ReCodEx CLI: ", intro="Welcome to the ReCodEx Client Shell")
 state = CommandState()
 
 @app.command()
@@ -71,7 +71,7 @@ def call(
     client = get_client_with_verbosity()
 
     if endpoint == "":
-        command = lambda: cmd.call_interactive(client, verbose)
+        command = lambda: cmd.call_interactive(client, state)
     else:
         def command():
             #TODO: handle other params
