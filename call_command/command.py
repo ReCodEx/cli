@@ -4,10 +4,12 @@ import typer
 import inquirer
 import click
 
+from call_command.response_printer import print_response
 import call_command.cmd_utils as cmd_utils
 from call_command.help_printer import HelpPrinter
+from call_command.command_state import CommandState
 
-def call_interactive(client: Client, verbose: bool):
+def call_interactive(client: Client, state: CommandState):
     # start an interactive prompt if there is no endpoint
     endpoint_resolver = EndpointResolver()
     presenter, handler = prompt_endpoint(endpoint_resolver)
@@ -15,19 +17,19 @@ def call_interactive(client: Client, verbose: bool):
     path_param_values, query_param_values, body_string = prompt_request_data(endpoint_resolver, presenter, handler)
     body = cmd_utils.parse_json(body_string)
     
-    call(client, endpoint, path_param_values, query_param_values, body, verbose)
+    call(client, endpoint, path_param_values, query_param_values, body, state)
 
-def call(client: Client, endpoint: str, path_values: list[str], query_values: list[str], body: dict, verbose: bool):
+def call(client: Client, endpoint: str, path_values: list[str], query_values: list[str], body: dict, state: CommandState):
     presenter, handler = cmd_utils.parse_endpoint_or_throw(endpoint)
 
     # parse params
     path_dict = path_list_to_dict(client.endpoint_resolver, presenter, handler, path_values)
     query_dict = query_list_to_dict(client.endpoint_resolver, presenter, handler, query_values)
 
-    if verbose:
+    if state.verbose:
         typer.echo("Sending Request...")
     response = client.send_request(presenter, handler, body, path_dict, query_dict)
-    print(response.data)
+    print_response(response, state)
 
 def path_list_to_dict(endpoint_resolver: EndpointResolver, presenter: str, handler: str, path_values: list[str]) -> dict[str, str]:
     # get param definitions
