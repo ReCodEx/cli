@@ -11,6 +11,7 @@ from call_command.command_state import CommandState
 
 def call_interactive(client: Client, state: CommandState):
     # start an interactive prompt if there is no endpoint
+    ### TODO: handle interactive files
     endpoint_resolver = EndpointResolver()
     presenter, handler = prompt_endpoint(endpoint_resolver)
     endpoint = f"{presenter}.{handler}"
@@ -19,7 +20,7 @@ def call_interactive(client: Client, state: CommandState):
     
     call(client, endpoint, path_param_values, query_param_values, body, state)
 
-def call(client: Client, endpoint: str, path_values: list[str], query_values: list[str], body: dict, state: CommandState):
+def call(client: Client, endpoint: str, path_values: list[str], query_values: list[str], body: dict, state: CommandState, files: dict={}):
     presenter, handler = cmd_utils.parse_endpoint_or_throw(endpoint)
 
     # parse params
@@ -28,7 +29,7 @@ def call(client: Client, endpoint: str, path_values: list[str], query_values: li
 
     if state.verbose:
         typer.echo("Sending Request...")
-    response = client.send_request(presenter, handler, body, path_dict, query_dict)
+    response = client.send_request(presenter, handler, body, path_dict, query_dict, files)
     print_response(response, state)
 
 def path_list_to_dict(endpoint_resolver: EndpointResolver, presenter: str, handler: str, path_values: list[str]) -> dict[str, str]:

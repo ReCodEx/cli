@@ -29,14 +29,17 @@ def call(
         str, typer.Argument(help="Endpoint identifier in <presenter.handler> format", is_eager=True)
     ] = "",
     path: Annotated[
-        list[str], typer.Option(help="Path Parameters", rich_help_panel="Request Parameters")
+        list[str], typer.Option(help="Pass a single PATH parameter", rich_help_panel="Request Parameters")
     ] = [],
     query: Annotated[
-        list[str], typer.Option(help="Query Parameters", rich_help_panel="Request Parameters")
+        list[str], typer.Option(help="Pass a single QUERY parameters in <key=value> format", rich_help_panel="Request Parameters")
     ] = [],
     body: Annotated[
         str, typer.Option(help="JSON Body", rich_help_panel="Request Parameters")
     ] = "{}",
+    file: Annotated[
+        str|None, typer.Option(help="Filepath to file to be uploaded", rich_help_panel="Request Parameters")
+    ] = None,
     yaml: Annotated[
         bool, typer.Option(help="Whether to print the output in YAML format instead of JSON")
     ] = False,
@@ -54,8 +57,12 @@ def call(
     ] = False,
 ):
     """Calls a ReCodEx endpoint with the provided parameters.
+    
     Requires an endpoint identifier in <presenter.handler> format.
-    Use --path, --query, and --body options to pass a json string representing the parameters.
+
+    Use --path options to pass PATH parameter values in order of definition,
+    use --query options in <key=value> format to pass QUERY parameters,
+    use --body to pass a JSON body.
     """
     
     # help is handled in call_command.help_callback
@@ -68,6 +75,11 @@ def call(
     if yaml:
         state.output_format = "yaml"
 
+    if file == None:
+        file_obj = {}
+    else:
+        file_obj = {"file": file}
+
     client = get_client_with_verbosity()
 
     if endpoint == "":
@@ -76,7 +88,7 @@ def call(
         def command():
             #TODO: handle other params
             parsed_body = cmd_utils.parse_json(body)
-            cmd.call(client, endpoint, path, query, parsed_body, state)
+            cmd.call(client, endpoint, path, query, parsed_body, state, files=file_obj)
 
     execute_with_verbosity(command)
 
