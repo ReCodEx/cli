@@ -35,13 +35,16 @@ def call(
         list[str], typer.Option(help="Pass a single QUERY parameters in <key=value> format", rich_help_panel="Request Parameters")
     ] = [],
     body: Annotated[
-        str, typer.Option(help="JSON Body", rich_help_panel="Request Parameters")
+        str, typer.Option(help="JSON or YAML request body (format detected automatically)", rich_help_panel="Request Parameters")
     ] = "{}",
+    body_path: Annotated[
+        str|None, typer.Option(help="If set, the request body will be read from the specified file (JSON or YAML)", allow_dash=True)
+    ] = None,
     file: Annotated[
         str|None, typer.Option(help="Filepath to file to be uploaded", rich_help_panel="Request Parameters")
     ] = None,
-    yaml: Annotated[
-        bool, typer.Option(help="Whether to print the output in YAML format instead of JSON")
+    return_yaml: Annotated[
+        bool, typer.Option(help="Whether to print the output in YAML format instead of JSON", allow_dash=True)
     ] = False,
     minimized: Annotated[
         bool, typer.Option(help="Whether the output should be minimized")
@@ -57,7 +60,7 @@ def call(
     ] = False,
 ):
     """Calls a ReCodEx endpoint with the provided parameters.
-    
+
     Requires an endpoint identifier in <presenter.handler> format.
 
     Use --path options to pass PATH parameter values in order of definition,
@@ -72,7 +75,7 @@ def call(
     state.verbose = verbose
     state.output_minimized = minimized
     state.output_path = out_path
-    if yaml:
+    if return_yaml:
         state.output_format = "yaml"
 
     if file == None:
@@ -86,8 +89,10 @@ def call(
         command = lambda: cmd.call_interactive(client, state)
     else:
         def command():
-            #TODO: handle other params
-            parsed_body = cmd_utils.parse_json(body)
+            if body_path == None:
+                parsed_body = cmd_utils.parse_input_body(body)
+            else:
+                parsed_body = cmd_utils.parse_input_body_file(body_path)
             cmd.call(client, endpoint, path, query, parsed_body, state, files=file_obj)
 
     execute_with_verbosity(command)
@@ -101,4 +106,3 @@ def execute_with_verbosity(command: Callable[[], typing.Any]):
 
 if __name__ == "__main__":
     app()
-    ###TODO: handle files

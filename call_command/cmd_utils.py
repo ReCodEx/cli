@@ -1,4 +1,5 @@
 import json
+import yaml
 import click
 import typing
 from collections.abc import Callable
@@ -15,6 +16,26 @@ def parse_json(json_string):
         return json.loads(json_string)
     except:
         raise Exception("The JSON string is corrupted.")
+
+def parse_input_body_file(path):
+    try:
+        with open(path, "r") as handle:
+            json_or_yaml_string = handle.read()
+    except:
+        raise Exception("Could not open request body file.")
+
+    return parse_input_body(json_or_yaml_string)
+
+def parse_input_body(json_or_yaml_string):
+    try:
+        return json.loads(json_or_yaml_string)
+    except:
+        pass
+
+    try:
+        return yaml.safe_load(json_or_yaml_string)
+    except:
+        raise Exception("The request body in neither a valid JSON or YAML.")
 
 def execute_with_verbosity(command: Callable[[], typing.Any], verbose: bool):
     try:
