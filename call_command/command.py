@@ -96,10 +96,10 @@ def prompt_endpoint(endpoint_resolver: EndpointResolver):
 
 def prompt_request_data(endpoint_resolver: EndpointResolver, presenter: str, handler: str):
     path_params = endpoint_resolver.get_path_params(presenter, handler)
-    path_param_values = prompt_param_values(path_params)
+    path_param_values = prompt_path_values(path_params)
 
     query_params = endpoint_resolver.get_query_params(presenter, handler)
-    query_param_values = prompt_param_values(query_params)
+    query_param_values = prompt_query_values(query_params)
 
     json_string = "{}"
     if endpoint_resolver.endpoint_has_body(presenter, handler):
@@ -107,8 +107,21 @@ def prompt_request_data(endpoint_resolver: EndpointResolver, presenter: str, han
 
     return path_param_values, query_param_values, json_string
 
-def prompt_param_values(params):
-    param_values = {}
+# prompt the user for path values, returning a list of retrieved values
+def prompt_path_values(params):
+    path_values = []
+    for param in params:
+        prompt_tokens = cmd_utils.get_param_info_text_tokens(param)
+        prompt = " ".join(prompt_tokens.values())
+
+        # get prompt value
+        value = typer.prompt(prompt)
+        path_values.append(value)
+    return path_values
+
+# prompt the user for query values, returning a list in <name=value> format
+def prompt_query_values(params):
+    query_values = []
     for param in params:
         prompt_tokens = cmd_utils.get_param_info_text_tokens(param)
         prompt = " ".join(prompt_tokens.values())
@@ -116,7 +129,7 @@ def prompt_param_values(params):
         required = param["required"]
 
         # get prompt value
-        #TODO: handle lists
+        #TODO: handle list value types
         if required:
             value = typer.prompt(prompt)
         else:
@@ -124,9 +137,10 @@ def prompt_param_values(params):
 
         # do not propagate empty strings
         if value != "":
-            param_values[name] = value
+            # the call function expects query params in <name=value> format
+            query_values.append(f"{name}={value}")
 
-    return param_values
+    return query_values
 
 def help_callback(ctx: click.Context, _, display_help: bool):
     if not display_help:
