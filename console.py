@@ -9,6 +9,10 @@ from recodex_cli_lib.client import Client
 import call_command.command as cmd
 import call_command.cmd_utils as cmd_utils
 from call_command.command_state import CommandState
+from call_command.response_printer import print_response
+
+import recodex_cli_lib.generated.swagger_client.api.default_api as api
+import recodex_cli_lib.file_upload_helper as file_upload_helper
 
 app = make_typer_shell(prompt="ReCodEx CLI: ", intro="Welcome to the ReCodEx Client Shell")
 state = CommandState()
@@ -16,12 +20,30 @@ state = CommandState()
 @app.command()
 def swagger(
     verbose: Annotated[
-        bool, typer.Option(help="Execution Verbosity", is_eager=True)
+        bool, typer.Option(help="Execution Verbosity")
     ] = False,
 ):
     state.verbose = verbose
     client = get_client_with_verbosity()
     print(client.endpoint_resolver.get_swagger())
+
+@app.command()
+def upload(
+    filepath: Annotated[
+        str, typer.Argument(help="Path to the file to be uploaded")
+    ],
+    verbose: Annotated[
+        bool, typer.Option(help="Execution Verbosity")
+    ] = False,
+):
+    state.verbose = verbose
+    client = get_client_with_verbosity()
+
+    command = lambda: file_upload_helper.upload(client, filepath, verbose)
+    file_id = execute_with_verbosity(command)
+    
+    print("File sent successfully")
+    print(f"File ID: {file_id}")
 
 @app.command()
 def call(
