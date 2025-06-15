@@ -23,6 +23,8 @@ def swagger(
         bool, typer.Option(help="Execution Verbosity")
     ] = False,
 ):
+    """Prints the swagger document currently used by the application.
+    """
     state.verbose = verbose
     client = get_client_with_verbosity()
     print(client.endpoint_resolver.get_swagger())
@@ -36,6 +38,8 @@ def upload(
         bool, typer.Option(help="Execution Verbosity")
     ] = False,
 ):
+    """Uploads the given file to the ReCodEx server in chunks.
+    """
     state.verbose = verbose
     client = get_client_with_verbosity()
 
