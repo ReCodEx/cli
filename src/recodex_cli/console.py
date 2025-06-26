@@ -1,53 +1,21 @@
 import typer
-from typer_shell import make_typer_shell
 from typing_extensions import Annotated
 import typing
 from collections.abc import Callable
-
-from utils import client_factory
+import click
 from recodex_cli_lib.client import Client
-import call_command.command as cmd
-import call_command.cmd_utils as cmd_utils
-from call_command.command_state import CommandState
-from call_command.response_printer import print_response
-
 import recodex_cli_lib.generated.swagger_client.api.default_api as api
-import recodex_cli_lib.file_upload_helper as file_upload_helper
 
-app = make_typer_shell(prompt="ReCodEx CLI: ", intro="Welcome to the ReCodEx Client Shell")
+from .utils import client_factory
+from .utils import cmd_utils as cmd_utils
+from .call_command import command as cmd
+from .call_command.command_state import CommandState
+from .plugins import file_plugins
+
+app = typer.Typer()
 state = CommandState()
 
-@app.command()
-def swagger(
-    verbose: Annotated[
-        bool, typer.Option(help="Execution Verbosity")
-    ] = False,
-):
-    """Prints the swagger document currently used by the application.
-    """
-    state.verbose = verbose
-    client = get_client_with_verbosity()
-    print(client.endpoint_resolver.get_swagger())
-
-@app.command()
-def upload(
-    filepath: Annotated[
-        str, typer.Argument(help="Path to the file to be uploaded")
-    ],
-    verbose: Annotated[
-        bool, typer.Option(help="Execution Verbosity")
-    ] = False,
-):
-    """Uploads the given file to the ReCodEx server in chunks.
-    """
-    state.verbose = verbose
-    client = get_client_with_verbosity()
-
-    command = lambda: file_upload_helper.upload(client, filepath, verbose)
-    file_id = execute_with_verbosity(command)
-    
-    print("File sent successfully")
-    print(f"File ID: {file_id}")
+app.add_typer(file_plugins.app, name="file")
 
 @app.command()
 def call(
@@ -71,6 +39,9 @@ def call(
     ] = None,
     return_yaml: Annotated[
         bool, typer.Option(help="Whether to print the output in YAML format instead of JSON", allow_dash=True)
+    ] = False,
+    return_raw: Annotated[
+        bool, typer.Option(help="Whether to print the raw, unparsed output", allow_dash=True)
     ] = False,
     minimized: Annotated[
         bool, typer.Option(help="Whether the output should be minimized")
@@ -101,15 +72,20 @@ def call(
     state.verbose = verbose
     state.output_minimized = minimized
     state.output_path = out_path
+
+    if return_yaml and return_raw:
+        click.ClickException("--return-yaml and --return-raw cannot be used both at the same time")
     if return_yaml:
         state.output_format = "yaml"
+    elif return_raw:
+        state.output_format = "raw"
 
     if file == None:
         file_obj = {}
     else:
         file_obj = {"file": file}
 
-    client = get_client_with_verbosity()
+    client = client_factory.get_client_with_verbosity(state.verbose)
 
     if endpoint == "":
         command = lambda: cmd.call_interactive(client, state)
@@ -121,14 +97,7 @@ def call(
                 parsed_body = cmd_utils.parse_input_body_file(body_path)
             cmd.call(client, endpoint, path, query, parsed_body, state, files=file_obj)
 
-    execute_with_verbosity(command)
-
-
-def get_client_with_verbosity() -> Client:
-    return execute_with_verbosity(client_factory.get_client)
-
-def execute_with_verbosity(command: Callable[[], typing.Any]):
-    return cmd_utils.execute_with_verbosity(command, state.verbose)
+    cmd.cmd_utils.execute_with_verbosity(command, state.verbose)
 
 if __name__ == "__main__":
     app()

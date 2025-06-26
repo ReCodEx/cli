@@ -1,13 +1,13 @@
-from recodex_cli_lib.client import Client
-from recodex_cli_lib.endpoint_resolver import EndpointResolver
 import typer
 import inquirer
 import click
+from recodex_cli_lib.client import Client
+from recodex_cli_lib.endpoint_resolver import EndpointResolver
 
-from call_command.response_printer import print_response
-import call_command.cmd_utils as cmd_utils
-from call_command.help_printer import HelpPrinter
-from call_command.command_state import CommandState
+from .response_printer import print_response
+from ..utils import cmd_utils as cmd_utils
+from .help_printer import HelpPrinter
+from .command_state import CommandState
 
 def call_interactive(client: Client, state: CommandState):
     # start an interactive prompt if there is no endpoint
@@ -20,7 +20,7 @@ def call_interactive(client: Client, state: CommandState):
     
     call(client, endpoint, path_param_values, query_param_values, body, state)
 
-def call(client: Client, endpoint: str, path_values: list[str], query_values: list[str], body: dict, state: CommandState, files: dict={}):
+def call(client: Client, endpoint: str, path_values: list[str]=[], query_values: list[str]=[], body: dict={}, state: CommandState=CommandState(), files: dict={}):
     presenter, handler = cmd_utils.parse_endpoint_or_throw(endpoint)
 
     # parse params

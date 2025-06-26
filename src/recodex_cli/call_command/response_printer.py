@@ -1,5 +1,6 @@
 from recodex_cli_lib.client_response import ClientResponse
-from call_command.command_state import CommandState
+
+from .command_state import CommandState
 
 def print_response(response: ClientResponse, state: CommandState):
   # get response string
@@ -7,6 +8,8 @@ def print_response(response: ClientResponse, state: CommandState):
     out_string = response.get_json_string(state.output_minimized)
   elif state.output_format == "yaml":
     out_string = response.get_yaml_string(state.output_minimized)
+  elif state.output_format == "raw":
+    out_string = response.data
   else:
     raise NotImplementedError(f"Unknown output format '{state.output_format}'. Please use 'yaml' or 'json'.")
   

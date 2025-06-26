@@ -1,6 +1,8 @@
+import typer
 from recodex_cli_lib import client_factory
 from recodex_cli_lib.client import Client
-import typer
+
+from .cmd_utils import execute_with_verbosity
 
 def get_client() -> Client:
     """Creates a client object. If the user context file is missing or expired,
@@ -25,3 +27,6 @@ def get_client() -> Client:
         return client_factory.get_client(user_context.api_url, username, password, verbose=True)
     
     return client_factory.get_client_from_user_context(user_context)
+
+def get_client_with_verbosity(verbose: bool) -> Client:
+    return execute_with_verbosity(get_client, verbose)

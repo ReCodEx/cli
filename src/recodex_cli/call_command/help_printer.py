@@ -1,9 +1,9 @@
 import click
-from recodex_cli_lib.endpoint_resolver import EndpointResolver
 from rich.console import Console
 from rich.panel import Panel
+from recodex_cli_lib.endpoint_resolver import EndpointResolver
 
-import call_command.cmd_utils as cmd_utils
+from ..utils import cmd_utils as cmd_utils
 
 class HelpPrinter:
     def __get_param_panel(self, params: list[dict], title):
