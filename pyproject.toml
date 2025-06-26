@@ -4,13 +4,13 @@ requires = [
   "certifi>=14.05.14",
   "typer>=0.16",
   "inquirer>=3.4.0",
-  "recodex_cli_lib_eceltov>=0.0.56"
+  "recodex_cli_lib_eceltov>=0.0.57"
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "recodex_cli_eceltov"
-version = "0.0.15"
+version = "0.0.16"
 authors = [
   { name="Vojtech Kloda", email="vojtech.kloda@gmail.com" },
 ]
@@ -27,7 +27,7 @@ dependencies = [
   "certifi>=14.05.14",
   "typer>=0.16",
   "inquirer>=3.4.0",
-  "recodex_cli_lib_eceltov>=0.0.56"
+  "recodex_cli_lib_eceltov>=0.0.57"
 ]
 
 [project.urls]
