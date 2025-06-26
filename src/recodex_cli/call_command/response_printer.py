@@ -1,22 +1,31 @@
-from recodex_cli_lib.client_response import ClientResponse
+from recodex_cli_lib.helpers.client_response import ClientResponse
 
 from .command_state import CommandState
 
 def print_response(response: ClientResponse, state: CommandState):
-  # get response string
-  if state.output_format == "json":
-    out_string = response.get_json_string(state.output_minimized)
-  elif state.output_format == "yaml":
-    out_string = response.get_yaml_string(state.output_minimized)
-  elif state.output_format == "raw":
-    out_string = response.data
-  else:
-    raise NotImplementedError(f"Unknown output format '{state.output_format}'. Please use 'yaml' or 'json'.")
+    """Prints a response object to stdout or a file.
+
+    Args:
+        response (ClientResponse): The response object.
+        state (CommandState): The command state specifying how to print.
+
+    Raises:
+        NotImplementedError: Thrown when an unexpected output format is specified.
+    """
   
-  # print to console or file
-  if state.output_path == None:
-    print(out_string)
-  else:
-    with open(state.output_path, "w") as handle:
-      handle.write(out_string)
-  
+    # get response string
+    if state.output_format == "json":
+        out_string = response.get_json_string(state.output_minimized)
+    elif state.output_format == "yaml":
+        out_string = response.get_yaml_string(state.output_minimized)
+    elif state.output_format == "raw":
+        out_string = response.data
+    else:
+        raise NotImplementedError(f"Unknown output format '{state.output_format}'. Please use 'yaml' or 'json'.")
+    
+    # print to console or file
+    if state.output_path == None:
+        print(out_string)
+    else:
+        with open(state.output_path, "w") as handle:
+            handle.write(out_string)

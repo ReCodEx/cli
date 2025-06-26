@@ -1,8 +1,9 @@
 import typer
 import inquirer
 import click
+from collections.abc import Callable
 from recodex_cli_lib.client import Client
-from recodex_cli_lib.endpoint_resolver import EndpointResolver
+from recodex_cli_lib.client_components.endpoint_resolver import EndpointResolver
 
 from .response_printer import print_response
 from ..utils import cmd_utils as cmd_utils
@@ -10,8 +11,13 @@ from .help_printer import HelpPrinter
 from .command_state import CommandState
 
 def call_interactive(client: Client, state: CommandState):
-    # start an interactive prompt if there is no endpoint
-    ### TODO: handle interactive files
+    """Starts an interactive call prompt for the user.
+
+    Args:
+        client (Client): The client object used.
+        state (CommandState, optional): The state detailing extra info for the command execution. Defaults to CommandState().
+    """
+
     endpoint_resolver = EndpointResolver()
     presenter, handler = prompt_endpoint(endpoint_resolver)
     endpoint = f"{presenter}.{handler}"
@@ -20,7 +26,19 @@ def call_interactive(client: Client, state: CommandState):
     
     call(client, endpoint, path_param_values, query_param_values, body, state)
 
-def call(client: Client, endpoint: str, path_values: list[str]=[], query_values: list[str]=[], body: dict={}, state: CommandState=CommandState(), files: dict={}):
+def call(client: Client, endpoint: str|Callable, path_values: list[str]=[], query_values: list[str]=[], body: dict={}, state: CommandState=CommandState(), files: dict={}):
+    """Calls a single ReCodEx endpoint.
+
+    Args:
+        client (Client): The client object used.
+        endpoint (str | Callable): A string name or function of the endpoint.
+        path_values (list[str], optional): A list of PATH parameter values in order of definition. Defaults to [].
+        query_values (list[str], optional): A list of query parameters in the form of "name=value" strings. Defaults to [].
+        body (dict, optional): The body of the request. Defaults to {}.
+        state (CommandState, optional): The state detailing extra info for the command execution. Defaults to CommandState().
+        files (dict, optional): A dictionary of files uploaded to ReCodEx. Defaults to {}.
+    """
+
     presenter, handler = cmd_utils.parse_endpoint_or_throw(endpoint)
 
     # parse params

@@ -1,9 +1,7 @@
 import typer
 from typing_extensions import Annotated
-import typing
-from collections.abc import Callable
-from recodex_cli_lib.client import Client
-import recodex_cli_lib.file_upload_helper as file_upload_helper
+import recodex_cli_lib.helpers.file_upload_helper as file_upload_helper
+from recodex_cli_lib.generated.swagger_client.api.default_api import DefaultApi
 
 from ..utils import client_factory
 from ..utils import cmd_utils as cmd_utils
@@ -54,5 +52,5 @@ def download(
     state.output_path = out_path
     state.output_format = "raw"
 
-    command = lambda: call(client, "uploaded_files.download", path_values=[id], state=state)
+    command = lambda: call(client, DefaultApi.uploaded_files_presenter_action_download, path_values=[id], state=state)
     cmd_utils.execute_with_verbosity(command, verbose)

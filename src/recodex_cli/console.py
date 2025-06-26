@@ -10,12 +10,14 @@ from .utils import client_factory
 from .utils import cmd_utils as cmd_utils
 from .call_command import command as cmd
 from .call_command.command_state import CommandState
-from .plugins import file_plugins
+from .plugins import file_plugins, info_plugins
 
 app = typer.Typer()
 state = CommandState()
 
+# register plugins
 app.add_typer(file_plugins.app, name="file")
+app.add_typer(info_plugins.app, name="info")
 
 @app.command()
 def call(
@@ -26,7 +28,7 @@ def call(
         list[str], typer.Option(help="Pass a single PATH parameter", rich_help_panel="Request Parameters")
     ] = [],
     query: Annotated[
-        list[str], typer.Option(help="Pass a single QUERY parameters in <key=value> format", rich_help_panel="Request Parameters")
+        list[str], typer.Option(help="Pass a single QUERY parameters in <name=value> format", rich_help_panel="Request Parameters")
     ] = [],
     body: Annotated[
         str, typer.Option(help="JSON or YAML request body (format detected automatically)", rich_help_panel="Request Parameters")

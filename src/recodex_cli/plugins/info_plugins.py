@@ -1,9 +1,5 @@
 import typer
 from typing_extensions import Annotated
-import typing
-from collections.abc import Callable
-from recodex_cli_lib.client import Client
-import recodex_cli_lib.file_upload_helper as file_upload_helper
 
 from ..utils import client_factory
 from ..utils import cmd_utils as cmd_utils

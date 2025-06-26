@@ -1,11 +1,14 @@
 import click
 from rich.console import Console
 from rich.panel import Panel
-from recodex_cli_lib.endpoint_resolver import EndpointResolver
+from recodex_cli_lib.client_components.endpoint_resolver import EndpointResolver
 
 from ..utils import cmd_utils as cmd_utils
 
 class HelpPrinter:
+    """Class handling detailed help messages for the call command endpoints.
+    """
+
     def __get_param_panel(self, params: list[dict], title):
         rows_tokenized = []
         for param in params:

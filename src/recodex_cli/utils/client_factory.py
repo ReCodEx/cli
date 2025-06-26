@@ -29,4 +29,14 @@ def get_client() -> Client:
     return client_factory.get_client_from_user_context(user_context)
 
 def get_client_with_verbosity(verbose: bool) -> Client:
+    """Creates a client object. If the user context file is missing or expired,
+    prompts the user via CLI for login credentials.
+
+    Args:
+        verbose (bool): Whether to truncate error messages.
+
+    Returns:
+        Client: Returns a client object.
+    """
+
     return execute_with_verbosity(get_client, verbose)
