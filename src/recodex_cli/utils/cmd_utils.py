@@ -6,26 +6,26 @@ from collections.abc import Callable
 from recodex_cli_lib.helpers.utils import parse_endpoint_function
 
 def parse_endpoint_or_throw(endpoint: str|Callable) -> tuple[str]:
-    """Parses an endpoint representation into a presenter and handler.
+    """Parses an endpoint representation into a presenter and action.
 
     Args:
-        endpoint (str | Callable): Either a string in <presenter.handler> for or a generated endpoint function.
+        endpoint (str | Callable): Either a string in <presenter.action> for or a generated endpoint function.
 
     Raises:
         Exception: Thrown when the endpoint could not be parsed.
 
     Returns:
-        tuple[str]: Returns a (presenter, handler) string pair.
+        tuple[str]: Returns a (presenter, action) string pair.
     """
 
     if isinstance(endpoint, Callable):
         return parse_endpoint_function(endpoint)
 
     if endpoint.count(".") != 1:
-        raise Exception("The endpoint needs to be in <presenter.handler> format.")
+        raise Exception("The endpoint needs to be in <presenter.action> format.")
 
-    presenter, handler = endpoint.split(".")
-    return presenter, handler
+    presenter, action = endpoint.split(".")
+    return presenter, action
 
 def parse_json(json_string) -> str:
     try:

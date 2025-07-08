@@ -58,18 +58,18 @@ class HelpPrinter:
         self.print_detail = endpoint != ""
         if self.print_detail:
             def __init():
-                presenter, handler = cmd_utils.execute_with_verbosity(lambda: cmd_utils.parse_endpoint_or_throw(endpoint), verbose)
+                presenter, action = cmd_utils.execute_with_verbosity(lambda: cmd_utils.parse_endpoint_or_throw(endpoint), verbose)
                 endpoint_resolver = EndpointResolver()
                 self.console = Console()
-                path_params = endpoint_resolver.get_path_params(presenter, handler)
-                query_params = endpoint_resolver.get_query_params(presenter, handler)
+                path_params = endpoint_resolver.get_path_params(presenter, action)
+                query_params = endpoint_resolver.get_query_params(presenter, action)
 
                 self.path_panel, self.query_panel, self.body_panel = None, None, None
                 if len(path_params) > 0:
                     self.path_panel = self.__get_param_panel(path_params, "Path Parameters Detail")
                 if len(query_params) > 0:
                     self.query_panel = self.__get_param_panel(query_params, "Query Parameters Detail")
-                if endpoint_resolver.endpoint_has_body(presenter, handler):
+                if endpoint_resolver.endpoint_has_body(presenter, action):
                     self.body_panel = self.__create_panel("The endpoint expects a JSON body.", "Body Detail")
             cmd_utils.execute_with_verbosity(__init, verbose)
 

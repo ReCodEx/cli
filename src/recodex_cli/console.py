@@ -22,7 +22,7 @@ app.add_typer(info_plugins.app, name="info")
 @app.command()
 def call(
     endpoint: Annotated[
-        str, typer.Argument(help="Endpoint identifier in <presenter.handler> format", is_eager=True)
+        str, typer.Argument(help="Endpoint identifier in <presenter.action> format", is_eager=True)
     ] = "",
     path: Annotated[
         list[str], typer.Option(help="Pass a single PATH parameter", rich_help_panel="Request Parameters")
@@ -60,7 +60,7 @@ def call(
 ):
     """Calls a ReCodEx endpoint with the provided parameters.
 
-    Requires an endpoint identifier in <presenter.handler> format.
+    Requires an endpoint identifier in <presenter.action> format.
 
     Use --path options to pass PATH parameter values in order of definition,
     use --query options in <key=value> format to pass QUERY parameters,
