@@ -5,3 +5,4 @@ inquirer >= 3.4.0
 twine >= 6.1.0
 build >= 1.2.2
 recodex-cli-lib-eceltov==0.0.60
+flake8 >= 7.3.0

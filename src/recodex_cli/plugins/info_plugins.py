@@ -2,9 +2,9 @@ import typer
 from typing_extensions import Annotated
 
 from ..utils import client_factory
-from ..utils import cmd_utils as cmd_utils
 
 app = typer.Typer()
+
 
 @app.command()
 def swagger(

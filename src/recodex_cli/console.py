@@ -1,10 +1,6 @@
 import typer
 from typing_extensions import Annotated
-import typing
-from collections.abc import Callable
 import click
-from recodex_cli_lib.client import Client
-import recodex_cli_lib.generated.swagger_client.api.default_api as api
 
 from .utils import client_factory
 from .utils import cmd_utils as cmd_utils
@@ -19,6 +15,7 @@ state = CommandState()
 app.add_typer(file_plugins.app, name="file")
 app.add_typer(info_plugins.app, name="info")
 
+
 @app.command()
 def call(
     endpoint: Annotated[
@@ -28,16 +25,25 @@ def call(
         list[str], typer.Option(help="Pass a single PATH parameter", rich_help_panel="Request Parameters")
     ] = [],
     query: Annotated[
-        list[str], typer.Option(help="Pass a single QUERY parameters in <name=value> format", rich_help_panel="Request Parameters")
+        list[str], typer.Option(
+            help="Pass a single QUERY parameters in <name=value> format",
+            rich_help_panel="Request Parameters"
+        )
     ] = [],
     body: Annotated[
-        str, typer.Option(help="JSON or YAML request body (format detected automatically)", rich_help_panel="Request Parameters")
+        str, typer.Option(
+            help="JSON or YAML request body (format detected automatically)",
+            rich_help_panel="Request Parameters"
+        )
     ] = "{}",
     body_path: Annotated[
-        str|None, typer.Option(help="If set, the request body will be read from the specified file (JSON or YAML)", allow_dash=True)
+        str | None, typer.Option(
+            help="If set, the request body will be read from the specified file (JSON or YAML)",
+            allow_dash=True
+        )
     ] = None,
     file: Annotated[
-        str|None, typer.Option(help="Filepath to file to be uploaded", rich_help_panel="Request Parameters")
+        str | None, typer.Option(help="Filepath to file to be uploaded", rich_help_panel="Request Parameters")
     ] = None,
     return_yaml: Annotated[
         bool, typer.Option(help="Whether to print the output in YAML format instead of JSON", allow_dash=True)
@@ -49,7 +55,7 @@ def call(
         bool, typer.Option(help="Whether the output should be minimized")
     ] = False,
     out_path: Annotated[
-        str|None, typer.Option(help="If set, the output will be saved to this path", allow_dash=True)
+        str | None, typer.Option(help="If set, the output will be saved to this path", allow_dash=True)
     ] = None,
     verbose: Annotated[
         bool, typer.Option(help="Execution Verbosity", is_eager=True)
@@ -66,11 +72,11 @@ def call(
     use --query options in <key=value> format to pass QUERY parameters,
     use --body to pass a JSON body.
     """
-    
+
     # help is handled in call_command.help_callback
     if help:
         return
-    
+
     state.verbose = verbose
     state.output_minimized = minimized
     state.output_path = out_path
@@ -82,7 +88,7 @@ def call(
     elif return_raw:
         state.output_format = "raw"
 
-    if file == None:
+    if file is None:
         file_obj = {}
     else:
         file_obj = {"file": file}
@@ -90,16 +96,18 @@ def call(
     client = client_factory.get_client_with_verbosity(state.verbose)
 
     if endpoint == "":
-        command = lambda: cmd.call_interactive(client, state)
+        def command():
+            lambda: cmd.call_interactive(client, state)
     else:
         def command():
-            if body_path == None:
+            if body_path is None:
                 parsed_body = cmd_utils.parse_input_body(body)
             else:
                 parsed_body = cmd_utils.parse_input_body_file(body_path)
             cmd.call(client, endpoint, path, query, parsed_body, state, files=file_obj)
 
     cmd.cmd_utils.execute_with_verbosity(command, state.verbose)
+
 
 if __name__ == "__main__":
     app()

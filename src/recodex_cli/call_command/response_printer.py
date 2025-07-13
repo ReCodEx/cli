@@ -2,6 +2,7 @@ from recodex_cli_lib.client_components.client_response import ClientResponse
 
 from .command_state import CommandState
 
+
 def print_response(response: ClientResponse, state: CommandState):
     """Prints a response object to stdout or a file.
 
@@ -12,7 +13,7 @@ def print_response(response: ClientResponse, state: CommandState):
     Raises:
         NotImplementedError: Thrown when an unexpected output format is specified.
     """
-  
+
     # get response string
     if state.output_format == "json":
         out_string = response.get_json_string(state.output_minimized)
@@ -22,9 +23,9 @@ def print_response(response: ClientResponse, state: CommandState):
         out_string = response.data
     else:
         raise NotImplementedError(f"Unknown output format '{state.output_format}'. Please use 'yaml' or 'json'.")
-    
+
     # print to console or file
-    if state.output_path == None:
+    if state.output_path is None:
         print(out_string)
     else:
         with open(state.output_path, "w") as handle:

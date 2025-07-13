@@ -5,7 +5,8 @@ import typing
 from collections.abc import Callable
 from recodex_cli_lib.helpers.utils import parse_endpoint_function
 
-def parse_endpoint_or_throw(endpoint: str|Callable) -> tuple[str]:
+
+def parse_endpoint_or_throw(endpoint: str | Callable) -> tuple[str, str]:
     """Parses an endpoint representation into a presenter and action.
 
     Args:
@@ -27,11 +28,13 @@ def parse_endpoint_or_throw(endpoint: str|Callable) -> tuple[str]:
     presenter, action = endpoint.split(".")
     return presenter, action
 
-def parse_json(json_string) -> str:
+
+def parse_json(json_string) -> dict:
     try:
         return json.loads(json_string)
     except:
         raise Exception("The JSON string is corrupted.")
+
 
 def parse_input_body_file(path: str) -> dict:
     """Parses a file as JSON or YAML.
@@ -53,6 +56,7 @@ def parse_input_body_file(path: str) -> dict:
         raise Exception("Could not open request body file.")
 
     return parse_input_body(json_or_yaml_string)
+
 
 def parse_input_body(json_or_yaml_string: str) -> dict:
     """Parses a string as JSON or YAML.
@@ -77,6 +81,7 @@ def parse_input_body(json_or_yaml_string: str) -> dict:
     except:
         raise Exception("The request body in neither a valid JSON or YAML.")
 
+
 def execute_with_verbosity(command: Callable[[], typing.Any], verbose: bool):
     """Executes a callback with a specified error verbosity.
 
@@ -99,6 +104,7 @@ def execute_with_verbosity(command: Callable[[], typing.Any], verbose: bool):
             raise e
         else:
             raise click.ClickException(str(e))
+
 
 def get_param_info_text_tokens(param: dict) -> dict:
     """Parses a request parameter schema.

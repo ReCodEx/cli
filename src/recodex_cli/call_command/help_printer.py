@@ -5,11 +5,17 @@ from recodex_cli_lib.client_components.endpoint_resolver import EndpointResolver
 
 from ..utils import cmd_utils as cmd_utils
 
+
 class HelpPrinter:
     """Class handling detailed help messages for the call command endpoints.
     """
 
-    def __get_param_panel(self, params: list[dict], title):
+    path_panel: Panel | None = None
+    query_panel: Panel | None = None
+    body_panel: Panel | None = None
+    console: Console | None = None
+
+    def __get_param_panel(self, params: list[dict], title) -> Panel:
         rows_tokenized = []
         for param in params:
             rows_tokenized.append(cmd_utils.get_param_info_text_tokens(param))
@@ -23,8 +29,14 @@ class HelpPrinter:
 
         text = "\n".join(rows)
         return self.__create_panel(text, title)
-    
-    def __add_text_token(self, texts: list[str], token_dicts: list[dict[str, str]], token_key: str, color: str = "white"):
+
+    def __add_text_token(
+            self,
+            texts: list[str],
+            token_dicts: list[dict[str, str]],
+            token_key: str,
+            color: str = "white"
+    ):
         max_len = 0
         for text in texts:
             if len(text) > max_len:
@@ -36,12 +48,12 @@ class HelpPrinter:
             # append texts with spaces
             texts[i] += " " * (max_len - len(texts[i]))
             # add token
-            token = f" {token_dicts[i][token_key]}".replace("[", "\[")
+            token = f" {token_dicts[i][token_key]}".replace("[", "\\[")
             # add token color
             token = f"[{color}]{token}[/{color}]"
             texts[i] += token
 
-    def __create_panel(self, text: str, title: str):
+    def __create_panel(self, text: str, title: str) -> Panel:
         # escape opening brackets
 
         return Panel(
@@ -58,7 +70,10 @@ class HelpPrinter:
         self.print_detail = endpoint != ""
         if self.print_detail:
             def __init():
-                presenter, action = cmd_utils.execute_with_verbosity(lambda: cmd_utils.parse_endpoint_or_throw(endpoint), verbose)
+                presenter, action = cmd_utils.execute_with_verbosity(
+                    lambda: cmd_utils.parse_endpoint_or_throw(endpoint),
+                    verbose
+                )
                 endpoint_resolver = EndpointResolver()
                 self.console = Console()
                 path_params = endpoint_resolver.get_path_params(presenter, action)
@@ -77,8 +92,8 @@ class HelpPrinter:
         self.__prepare(ctx, endpoint, verbose)
         self.ctx.command.format_help(self.ctx, self.formatter)
 
-        # with self.formatter.section("Test"):
-        #     self.formatter.write_dl([("test", "val")])
+        if self.console is None:
+            raise Exception("The Console was not instantiated properly.")
 
         if self.print_detail:
             if self.path_panel:

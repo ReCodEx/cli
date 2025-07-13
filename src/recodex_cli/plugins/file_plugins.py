@@ -10,6 +10,7 @@ from ..call_command.command_state import CommandState
 
 app = typer.Typer()
 
+
 @app.command()
 def upload(
     filepath: Annotated[
@@ -23,11 +24,13 @@ def upload(
     """
     client = client_factory.get_client_with_verbosity(verbose)
 
-    command = lambda: file_upload_helper.upload(client, filepath, verbose)
+    def command():
+        file_upload_helper.upload(client, filepath, verbose)
     file_id = cmd_utils.execute_with_verbosity(command, verbose)
-    
+
     print("File sent successfully")
     print(f"File ID: {file_id}")
+
 
 @app.command()
 def download(
@@ -35,7 +38,7 @@ def download(
         str, typer.Argument(help="The ID of the file")
     ],
     out_path: Annotated[
-        str|None, typer.Option(
+        str | None, typer.Option(
             help="If set, the file will be saved to this path instead of being printed to stdin",
             allow_dash=True
         )
@@ -52,5 +55,6 @@ def download(
     state.output_path = out_path
     state.output_format = "raw"
 
-    command = lambda: call(client, DefaultApi.uploaded_files_presenter_action_download, path_values=[id], state=state)
+    def command():
+        call(client, DefaultApi.uploaded_files_presenter_action_download, path_values=[id], state=state)
     cmd_utils.execute_with_verbosity(command, verbose)
