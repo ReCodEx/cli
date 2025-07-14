@@ -1,0 +1,37 @@
+name: CLI Tests with Flask Server
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: |
+          chmod +x ./tests/tests.sh
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+          PIP_EXTRA_INDEX_URL="https://test.pypi.org/simple/" python3 -m pip install -e .
+          apt install bats
+
+      - name: Start Flask server and run bash tests
+        run: |
+          python3 -m tests &
+          sleep 5
+          bats tests/tests.sh

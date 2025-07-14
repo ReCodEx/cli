@@ -97,7 +97,7 @@ def call(
 
     if endpoint == "":
         def command():
-            lambda: cmd.call_interactive(client, state)
+            cmd.call_interactive(client, state)
     else:
         def command():
             if body_path is None:
@@ -106,7 +106,64 @@ def call(
                 parsed_body = cmd_utils.parse_input_body_file(body_path)
             cmd.call(client, endpoint, path, query, parsed_body, state, files=file_obj)
 
-    cmd.cmd_utils.execute_with_verbosity(command, state.verbose)
+    cmd_utils.execute_with_verbosity(command, state.verbose)
+
+
+@app.command()
+def login(
+    token: Annotated[
+        str | None, typer.Option(help="Endpoint identifier in <presenter.action> format")
+    ] = None,
+    api_url: Annotated[
+        str | None, typer.Option(help="Endpoint identifier in <presenter.action> format")
+    ] = None,
+    username: Annotated[
+        str | None, typer.Option(help="Endpoint identifier in <presenter.action> format")
+    ] = None,
+    password: Annotated[
+        str | None, typer.Option(help="Endpoint identifier in <presenter.action> format")
+    ] = None,
+    verbose: Annotated[
+        bool, typer.Option(help="Execution Verbosity")
+    ] = False,
+):
+    """Calls a ReCodEx endpoint with the provided parameters.
+
+    Requires an endpoint identifier in <presenter.action> format.
+
+    Use --path options to pass PATH parameter values in order of definition,
+    use --query options in <key=value> format to pass QUERY parameters,
+    use --body to pass a JSON body.
+    """
+
+    if token is not None:
+        def command():
+            client_factory.login_with_token(token, api_url, verbose)
+    elif username is not None and password is not None:
+        def command():
+            client_factory.login_with_credentials(username, password, api_url, verbose)
+    else:
+        def command():
+            client_factory.login_with_prompt(verbose)
+
+    cmd_utils.execute_with_verbosity(command, verbose)
+
+@app.command()
+def logout(
+    verbose: Annotated[
+        bool, typer.Option(help="Execution Verbosity")
+    ] = False,
+):
+    """Calls a ReCodEx endpoint with the provided parameters.
+
+    Requires an endpoint identifier in <presenter.action> format.
+
+    Use --path options to pass PATH parameter values in order of definition,
+    use --query options in <key=value> format to pass QUERY parameters,
+    use --body to pass a JSON body.
+    """
+
+    cmd_utils.execute_with_verbosity(client_factory.logout, verbose)
 
 
 if __name__ == "__main__":

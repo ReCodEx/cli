@@ -25,7 +25,7 @@ def upload(
     client = client_factory.get_client_with_verbosity(verbose)
 
     def command():
-        file_upload_helper.upload(client, filepath, verbose)
+        return file_upload_helper.upload(client, filepath, verbose)
     file_id = cmd_utils.execute_with_verbosity(command, verbose)
 
     print("File sent successfully")
