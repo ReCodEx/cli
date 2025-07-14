@@ -21,7 +21,6 @@ jobs:
         with:
           python-version: '3.11'
 
-      # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           chmod +x ./tests/tests.sh
@@ -31,11 +30,15 @@ jobs:
 
       - name: Install Bats
         run: |
+          BATS_INSTALL_DIR="$HOME/.local"
+          mkdir -p "$BATS_INSTALL_DIR"
+
           git clone https://github.com/bats-core/bats-core.git
           cd bats-core
-          ./install.sh /usr/local
-          cd .. 
+          ./install.sh "$BATS_INSTALL_DIR"
+          cd ..
           rm -rf bats-core
+          echo "$BATS_INSTALL_DIR/bin" >> "$GITHUB_PATH"
 
       - name: Start Flask server and run bash tests
         run: |
