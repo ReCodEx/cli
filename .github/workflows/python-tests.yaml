@@ -28,10 +28,17 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install -r requirements.txt
           PIP_EXTRA_INDEX_URL="https://test.pypi.org/simple/" python3 -m pip install -e .
-          apt install bats
+
+      - name: Install Bats
+        run: |
+          git clone https://github.com/bats-core/bats-core.git
+          cd bats-core
+          ./install.sh /usr/local
+          cd .. 
+          rm -rf bats-core
 
       - name: Start Flask server and run bash tests
         run: |
-          python3 -m tests &
+          python3 -m tests & disown
           sleep 5
           bats tests/tests.sh
