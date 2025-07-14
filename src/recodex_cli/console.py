@@ -127,13 +127,11 @@ def login(
         bool, typer.Option(help="Execution Verbosity")
     ] = False,
 ):
-    """Calls a ReCodEx endpoint with the provided parameters.
+    """Creates a local user context file that stores the user session.
 
-    Requires an endpoint identifier in <presenter.action> format.
-
-    Use --path options to pass PATH parameter values in order of definition,
-    use --query options in <key=value> format to pass QUERY parameters,
-    use --body to pass a JSON body.
+    Use --username and --password to login with credentials.
+    Use --token to login with an API token.
+    Use --api-url if there is no session and the server URL could not be established.
     """
 
     if token is not None:
@@ -148,19 +146,14 @@ def login(
 
     cmd_utils.execute_with_verbosity(command, verbose)
 
+
 @app.command()
 def logout(
     verbose: Annotated[
         bool, typer.Option(help="Execution Verbosity")
     ] = False,
 ):
-    """Calls a ReCodEx endpoint with the provided parameters.
-
-    Requires an endpoint identifier in <presenter.action> format.
-
-    Use --path options to pass PATH parameter values in order of definition,
-    use --query options in <key=value> format to pass QUERY parameters,
-    use --body to pass a JSON body.
+    """Removes the local user context file, effectively logging the user out.
     """
 
     cmd_utils.execute_with_verbosity(client_factory.logout, verbose)
