@@ -22,7 +22,7 @@ def call(
         str, typer.Argument(help="Endpoint identifier in <presenter.action> format", is_eager=True)
     ] = "",
     path: Annotated[
-        Optional[list[str]], typer.Argument(help="Pass a single PATH parameter", rich_help_panel="Request Parameters")
+        Optional[list[str]], typer.Argument(help="Pass a series of PATH parameters", rich_help_panel="Request Parameters")
     ] = None,
     query: Annotated[
         list[str], typer.Option(
@@ -68,7 +68,7 @@ def call(
 
     Requires an endpoint identifier in <presenter.action> format.
 
-    Use --path options to pass PATH parameter values in order of definition,
+    Pass PATH parameter values in order of definition as additional arguments,
     use --query options in <key=value> format to pass QUERY parameters,
     use --body to pass a JSON body.
     """
