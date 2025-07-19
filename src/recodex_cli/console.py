@@ -1,5 +1,5 @@
 import typer
-from typing_extensions import Annotated
+from typing_extensions import Optional, Annotated
 import click
 
 from .utils import client_factory
@@ -22,8 +22,8 @@ def call(
         str, typer.Argument(help="Endpoint identifier in <presenter.action> format", is_eager=True)
     ] = "",
     path: Annotated[
-        list[str], typer.Option(help="Pass a single PATH parameter", rich_help_panel="Request Parameters")
-    ] = [],
+        Optional[list[str]], typer.Argument(help="Pass a single PATH parameter", rich_help_panel="Request Parameters")
+    ] = None,
     query: Annotated[
         list[str], typer.Option(
             help="Pass a single QUERY parameters in <name=value> format",
@@ -92,6 +92,10 @@ def call(
         file_obj = {}
     else:
         file_obj = {"file": file}
+
+    # convert path arguments into an empty list if none were provided
+    if path is None:
+        path = []
 
     client = client_factory.get_client_with_verbosity(state.verbose)
 

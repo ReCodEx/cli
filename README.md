@@ -78,7 +78,7 @@ The client defines the `call` command, which can be used to call any endpoint.
     python3 -m recodex_cli call registration.create_invitation --body-path invite.yaml
 
     # PATH parameters are used in order of declaration (the first one is usually the ID)
-    python3 -m recodex_cli call groups.set_organizational --path 10000000-2000-4000-8000-160000000000 --body '{"value":true}'
+    python3 -m recodex_cli call groups.set_organizational 10000000-2000-4000-8000-160000000000 --body '{"value":true}'
     ```
 
 - **Help:** To print a detailed description on how to use the command, use:
