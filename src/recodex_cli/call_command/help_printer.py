@@ -92,10 +92,9 @@ class HelpPrinter:
         self.__prepare(ctx, endpoint, verbose)
         self.ctx.command.format_help(self.ctx, self.formatter)
 
-        if self.console is None:
-            raise Exception("The Console was not instantiated properly.")
-
         if self.print_detail:
+            if self.console is None:
+                raise Exception("The Console was not instantiated properly.")
             if self.path_panel:
                 self.console.print(self.path_panel)
             if self.query_panel:
