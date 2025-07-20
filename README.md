@@ -33,17 +33,18 @@ source venv/bin/activate
 
 ## Getting Started
 
-- **Login:** You can login with your credentials or an API token. When no command options are specified, an interactive prompt will be shown that will query your credentials.
+- **Login:** You can login with your credentials or an API token.
 
     ```bash
     # login with credentials
-    python3 -m recodex_cli login --username test --password test --api-url http://localhost:4000 --verbose
+    python3 -m recodex_cli login --username test@test.tld --password test --api-url http://localhost:4000
 
-    # login with API token
-    python3 -m recodex_cli login --api-url http://localhost:4000 --token eyJ... --verbose
+    # login with an API token
+    python3 -m recodex_cli login --api-url http://localhost:4000 --token eyJ...
 
-    # login with credentials via prompts
-    python3 -m recodex_cli login
+    # login via an interactive prompt
+    python3 -m recodex_cli login --prompt-credentials
+    python3 -m recodex_cli login --prompt-token
 
     # logout
     python3 -m recodex_cli logout

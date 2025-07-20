@@ -4,6 +4,7 @@ import click
 
 from .utils import client_factory
 from .utils import cmd_utils as cmd_utils
+from .utils.login_info import LoginInfo
 from .call_command import command as cmd
 from .call_command.command_state import CommandState
 from .plugins import file_plugins, info_plugins
@@ -127,27 +128,29 @@ def login(
     password: Annotated[
         str | None, typer.Option(help="Endpoint identifier in <presenter.action> format")
     ] = None,
+    prompt_credentials: Annotated[
+        bool, typer.Option(help="Whether a prompt querying a username and password should be shown", allow_dash=True)
+    ] = False,
+    prompt_token: Annotated[
+        bool, typer.Option(help="Whether a prompt querying an API token should be shown", allow_dash=True)
+    ] = False,
     verbose: Annotated[
         bool, typer.Option(help="Execution Verbosity")
     ] = False,
 ):
-    """Creates a local user context file that stores the user session.
+    """Logs the user in by creating a local session file.
 
     Use --username and --password to login with credentials.
     Use --token to login with an API token.
     Use --api-url if there is no session and the server URL could not be established.
+
+    Use --prompt-credentials or --prompt-token to display an interactive prompt.
     """
 
-    if token is not None:
-        def command():
-            client_factory.login_with_token(token, api_url, verbose)
-    elif username is not None and password is not None:
-        def command():
-            client_factory.login_with_credentials(username, password, api_url, verbose)
-    else:
-        def command():
-            client_factory.login_with_prompt(verbose)
+    login_info = LoginInfo(api_url, token, username, password, prompt_credentials, prompt_token)
 
+    def command():
+        client_factory.login(login_info, verbose)
     cmd_utils.execute_with_verbosity(command, verbose)
 
 
