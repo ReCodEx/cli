@@ -40,7 +40,7 @@ def login(login_info: LoginInfo, verbose=False):
         if login_info.username is None:
             login_info.username = typer.prompt("Username")
         if login_info.password is None:
-            login_info.password = typer.prompt("Password")
+            login_info.password = typer.prompt("Password", hide_input=True)
         client_factory.create_session_from_credentials(
             login_info.api_url,
             login_info.username,
