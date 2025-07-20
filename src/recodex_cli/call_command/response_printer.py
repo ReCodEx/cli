@@ -26,7 +26,10 @@ def print_response(response: ClientResponse, state: CommandState):
 
     # print to console or file
     if state.output_path is None:
-        print(out_string)
+        if state.output_extra_newline:
+            print(out_string)
+        else:
+            print(out_string, end="")
     else:
         with open(state.output_path, "w") as handle:
             handle.write(out_string)

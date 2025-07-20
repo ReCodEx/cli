@@ -11,5 +11,8 @@ class CommandState:
     # whether the output should be minimized (single-line json, minimized YAML)
     output_minimized: bool = False
 
+    # when printing the output, should an extra newline be printed
+    output_extra_newline: bool = True
+
     def __init__(self, verbose: bool = False):
         self.verbose = verbose

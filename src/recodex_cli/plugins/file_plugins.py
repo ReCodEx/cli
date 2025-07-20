@@ -55,6 +55,9 @@ def download(
     state.output_path = out_path
     state.output_format = "raw"
 
+    # preserve the file content and do not add any extra newline
+    state.output_extra_newline = False
+
     def command():
         call(client, DefaultApi.uploaded_files_presenter_action_download, path_values=[id], state=state)
     cmd_utils.execute_with_verbosity(command, verbose)
