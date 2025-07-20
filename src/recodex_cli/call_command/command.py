@@ -1,6 +1,7 @@
 import typer
 import inquirer
 import click
+from typing import Any
 from collections.abc import Callable
 from recodex_cli_lib.client import Client
 from recodex_cli_lib.client_components.endpoint_resolver import EndpointResolver
@@ -97,21 +98,27 @@ def query_list_to_dict(
     presenter: str,
     action: str,
     query_values: list[str]
-) -> dict[str, str]:
+) -> dict[str, Any]:
     query_dict = {}
     for query_value in query_values:
-        if query_value.count("=") != 1:
+        if query_value.count("=") < 1:
             raise Exception("The query values need to be in <name=value> format.")
 
-        name, value = query_value.split("=")
+        # there can be '=' in the value, so split by the first one
+        split_pos = query_value.find("=")
+        name = query_value[0: split_pos]
+        value = query_value[split_pos + 1:]
+
         query_param = endpoint_resolver.get_query_param(presenter, action, name)
         if not query_param or name != query_param["python_name"]:
             raise Exception(f"Unknown QUERY parameter: {name}.")
 
-        # handle arrays
-        if query_param["schema"]["type"] == "array":
-            # arrays are delimited with commas
-            value = value.split(",")
+        # handle arrays and objects
+        if query_param["schema"]["type"] == "array" or query_param["schema"]["type"] == "object":
+            try:
+                value = cmd_utils.parse_json(value)
+            except:
+                raise Exception(f"The QUERY parameter '{name}' is not a valid JSON array or object.")
 
         query_dict[name] = value
     return query_dict
