@@ -31,5 +31,5 @@ def print_response(response: ClientResponse, state: CommandState):
         else:
             print(out_string, end="")
     else:
-        with open(state.output_path, "w") as handle:
-            handle.write(out_string)
+        with open(state.output_path, "wb") as handle:
+            handle.write(out_string.encode('utf-8'))
