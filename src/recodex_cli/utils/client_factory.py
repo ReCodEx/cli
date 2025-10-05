@@ -1,6 +1,6 @@
 import typer
-from recodex_cli_lib import client_factory
-from recodex_cli_lib.client import Client
+from recodex import client_factory
+from recodex.client import Client
 
 from .cmd_utils import execute_with_verbosity
 from .login_info import LoginInfo

@@ -1,7 +1,7 @@
 import click
 from rich.console import Console
 from rich.panel import Panel
-from recodex_cli_lib.client_components.endpoint_resolver import EndpointResolver
+from recodex.client_components.endpoint_resolver import EndpointResolver
 
 from ..utils import cmd_utils as cmd_utils
 

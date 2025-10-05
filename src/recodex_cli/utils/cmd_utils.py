@@ -3,7 +3,7 @@ import yaml
 import click
 import typing
 from collections.abc import Callable
-from recodex_cli_lib.helpers.utils import parse_endpoint_function
+from recodex.helpers.utils import parse_endpoint_function
 
 
 def parse_endpoint_or_throw(endpoint: str | Callable) -> tuple[str, str]:

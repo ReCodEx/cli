@@ -1,4 +1,4 @@
-from recodex_cli_lib.client_components.client_response import ClientResponse
+from recodex.client_components.client_response import ClientResponse
 
 from .command_state import CommandState
 

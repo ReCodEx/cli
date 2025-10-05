@@ -26,7 +26,7 @@ jobs:
           chmod +x ./tests/tests.sh
           python3 -m pip install --upgrade pip
           python3 -m pip install -r requirements.txt
-          PIP_EXTRA_INDEX_URL="https://test.pypi.org/simple/" python3 -m pip install -e .
+          python3 -m pip install -e .
 
       - name: Install Bats
         run: |

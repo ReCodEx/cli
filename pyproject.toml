@@ -4,17 +4,18 @@ requires = [
   "certifi>=14.05.14",
   "typer>=0.16",
   "inquirer>=3.4.0",
-  "recodex_cli_lib_eceltov>=0.0.66"
+  "recodex-pylib>=0.2.0"
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "recodex_cli_eceltov"
-version = "0.0.21"
+name = "recodex-cli"
+version = "0.2.0"
 authors = [
   { name="Vojtech Kloda", email="vojtech.kloda@gmail.com" },
+  { name="Martin Kruliš", email="krulis@d3s.mff.cuni.cz"},
 ]
-description = "A module for ReCodEx API calls."
+description = "CLI client for ReCodEx API implemented in Python based on recodex-pylib."
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
@@ -27,9 +28,13 @@ dependencies = [
   "certifi>=14.05.14",
   "typer>=0.16",
   "inquirer>=3.4.0",
-  "recodex_cli_lib_eceltov>=0.0.66"
+  "recodex-pylib>=0.2.0"
 ]
 
+[project.scripts]
+recodex = "recodex_cli.console:app"
+
 [project.urls]
-Homepage = "https://github.com/ReCodEx"
-Issues = "https://github.com/ReCodEx"
+Homepage = "https://github.com/ReCodEx/cli"
+Issues = "https://github.com/ReCodEx/cli/issues"
+

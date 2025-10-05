@@ -1,6 +1,9 @@
 # Runs the CI/CD tests locally.
 
-./commands/initRepo.sh
+# switch to the repository root
+cd `dirname "$0"`/..
+
+./bin/init.sh
 
 source venv/bin/activate
 rm ~/.local/share/recodex/context.yaml

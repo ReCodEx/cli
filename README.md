@@ -1,59 +1,81 @@
-# ReCodEx Client
+# ReCodEx CLI Client
 
-A command-line interface for the [ReCodEx](https://recodex.mff.cuni.cz/) system. This tool allows users to interact with ReCodEx from their terminal, streamlining workflows and enabling scripting possibilities.
+A command-line interface for the [ReCodEx](https://github.com/ReCodEx) system. This tool allows users to interact with ReCodEx from their terminal, streamlining workflows and enabling scripting possibilities. The aim is not to create a terminal-based replacement for web application, but rather an intermediate layer for bash scripts or other automation tools.
 
-## What is ReCodEx?
+This tool is built on top of the [recodex-pylib](https://github.com/ReCodEx/pylib) Python library, which provides a wrapper for ReCodEx API generated from OpenAPI (swagger) specification.
 
-ReCodEx is a system for dynamic analysis and evaluation of programming exercises. It allows supervisors to assign programming problems to students, who can then submit their solutions through a web interface. ReCodEx automatically evaluates these solutions by compiling and executing them in a safe environment, providing quick feedback to students.
 
 ## Key Features
 
-* **Authentication:** Securely log in to your ReCodEx account. The CLI will securely store your access token for future sessions.
-* **Execute Requests:** Send requests and view responses from the command line.
+* **Authentication:** Securely log in to your ReCodEx account. The CLI will securely store your access token for future sessions. The session is shared with the `recodex-pylib` library, so you can use it in conjunction with your Python scripts.
+* **Execute Requests:** Send API requests and view responses from the command line.
 * **Interactive Mode:** You can use the interactive mode to browse and use existing endpoints.
 * **Plugins:** Use existing plugins or write your own to streamline your work.
+
 
 ## Installation
 
 The recommended way to install the ReCodEx CLI is via `pip`. Python 3.11 is recommended, but other versions may also work:
 
 ```bash
-PIP_EXTRA_INDEX_URL="https://test.pypi.org/simple/" pip install recodex_cli_eceltov
+pip install recodex-cli
 ```
 
-### Installation from Source
+Note that this also installs the `recodex-pylib` library as a dependency.
 
-For developers or those who prefer to install directly from the source code, follow these steps:
+
+### Installation from source code
+
+For developers or those who prefer to install directly from the source code into local venv, follow these steps:
 
 ```bash
-# make sure to run these commands from the root of the repository
-./commands/initRepo.sh
-source venv/bin/activate
+./bin/init.sh
+source ./venv/bin/activate
 ```
 
+Or you can install it globally (not recommended):
+
+```bash
+pip install -r requirements.txt
+pip install -e .
+```
+
+
 ## Getting Started
+
+The CLI is invoked via either
+```bash
+python3 -m recodex_cli <command> [options]
+```
+or using the deployed script wrapper
+```bash
+recodex <command> [options]
+```
+
+Let us review basic operations:
 
 - **Login:** You can login with your credentials or an API token.
 
     ```bash
     # login with credentials
-    python3 -m recodex_cli login --username test@test.tld --password test --api-url http://localhost:4000
-
-    # login with an API token
-    python3 -m recodex_cli login --api-url http://localhost:4000 --token eyJ...
+    recodex login --username test@test.tld --password test --api-url http://your.recodex.domain/api
+    
+    # login with an API token (can be generated in webapp in user settings)
+    recodex login --api-url http://your.recodex.domain/api --token eyJ...
 
     # login via an interactive prompt
-    python3 -m recodex_cli login --prompt-credentials
-    python3 -m recodex_cli login --prompt-token
+    recodex login --prompt-credentials
+    recodex login --prompt-token
 
     # logout
-    python3 -m recodex_cli logout
+    recodex logout
     ```
+    Let us note that the JWT token (either provided or obtained after credentials verification) is stored in a configuration file in your home directory (usually `~/.local/share/recodex/context.yaml`).
 
 - **Explore Commands:** You can view the full list of available commands and options by running:
 
     ```bash
-    python3 -m recodex_cli --help
+    recodex --help
     ```
 
 ## Usage
@@ -66,32 +88,35 @@ The client defines the `call` command, which can be used to call any endpoint.
 
 
     ```bash
-    python3 -m recodex_cli call
+    recodex call
     ```
 
 - **Calling an Endpoint:** To call an endpoint, add an argument in the `presenter.action` format, followed by any request parameters.
 
     ```bash
     # use QUERY parameters in <name=value> format
-    python3 -m recodex_cli call groups.default --query search=Demo
+    recodex call groups.default --query search=Demo
+
+    # beware that some parameters must be encoded in JSON (the quotes must be backslashed so the bash won't remove them)
+    recodex call users.default --filters={\"search\":\"Kloda\"}
 
     # you can pass a JSON or YAML file as a request body
-    python3 -m recodex_cli call registration.create_invitation --body-path invite.yaml
+    recodex call registration.create_invitation --body-path invite.yaml
 
     # PATH parameters are used in order of declaration (the first one is usually the ID)
-    python3 -m recodex_cli call groups.set_organizational 10000000-2000-4000-8000-160000000000 --body '{"value":true}'
+    recodex call groups.set_organizational 10000000-2000-4000-8000-160000000000 --body '{"value":true}'
     ```
 
 - **Help:** To print a detailed description on how to use the command, use:
 
     ```bash
-    python3 -m recodex_cli call --help
+    recodex call --help
     ```
 
     You can also view all parameters of a specific command.
 
     ```bash
-    python3 -m recodex_cli call groups.default --help
+    recodex call groups.default --help
     ```
 
 ### Plugins
@@ -101,20 +126,20 @@ The client can also be extended with plugins that can streamline common request 
 - **File Upload:**  Files can be uploaded simply by providing a path. Larger files will automatically be fragmented into chunks.
 
     ```bash
-    python3 -m recodex_cli file upload test.csv 
+    recodex file upload test.csv 
     > File sent successfully
     > File ID: 73aac159-b2e2-402b-9e19-096f3ec0ae7c
     ```
 
 - **File Download:** 
     ```bash
-    python3 -m recodex_cli file download 73aac159-b2e2-402b-9e19-096f3ec0ae7c --out-path test.csv
+    recodex file download 73aac159-b2e2-402b-9e19-096f3ec0ae7c --out-path test.csv
     ```
 
 - **Get Swagger:** This command returns the Swagger document (OpenAPI Specification) currently used by the client.
 
     ```bash
-    python3 -m recodex_cli info swagger
+    recodex info swagger
     ```
 
 ## Development
@@ -138,7 +163,7 @@ The following skeleton implementation can be used as the basis for new commands:
 ```python
 import typer
 # import the DefaultApi class that holds all request functions
-from recodex_cli_lib.generated.swagger_client.api.default_api import DefaultApi
+from recodex.generated.swagger_client.api.default_api import DefaultApi
 
 from ..utils import client_factory
 from ..utils import cmd_utils as cmd_utils
@@ -170,8 +195,3 @@ def new_command(
     
     print(response)
 ```
-
-### Publishing
-
-Use the `commands/uploadPackage.sh` script to upload a new version of the client.
-Note that this will require a PyPI account and upload privileges.

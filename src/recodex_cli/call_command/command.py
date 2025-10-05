@@ -3,8 +3,8 @@ import inquirer
 import click
 from typing import Any
 from collections.abc import Callable
-from recodex_cli_lib.client import Client
-from recodex_cli_lib.client_components.endpoint_resolver import EndpointResolver
+from recodex.client import Client
+from recodex.client_components.endpoint_resolver import EndpointResolver
 
 from .response_printer import print_response
 from ..utils import cmd_utils as cmd_utils

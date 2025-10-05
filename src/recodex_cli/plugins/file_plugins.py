@@ -1,7 +1,7 @@
 import typer
 from typing_extensions import Annotated
-import recodex_cli_lib.helpers.file_upload_helper as file_upload_helper
-from recodex_cli_lib.generated.swagger_client.api.default_api import DefaultApi
+import recodex.helpers.file_upload_helper as file_upload_helper
+from recodex.generated.swagger_client.api.default_api import DefaultApi
 
 from ..utils import client_factory
 from ..utils import cmd_utils as cmd_utils
