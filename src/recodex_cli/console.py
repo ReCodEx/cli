@@ -1,6 +1,9 @@
 import typer
 from typing_extensions import Optional, Annotated
 import click
+import json
+
+from recodex.generated.swagger_client import DefaultApi
 
 from .utils import client_factory
 from .utils import cmd_utils as cmd_utils
@@ -8,6 +11,7 @@ from .utils.login_info import LoginInfo
 from .call_command import command as cmd
 from .call_command.command_state import CommandState
 from .plugins import file_plugins, info_plugins
+
 
 app = typer.Typer()
 state = CommandState()
@@ -23,7 +27,8 @@ def call(
         str, typer.Argument(help="Endpoint identifier in <presenter.action> format", is_eager=True)
     ] = "",
     path: Annotated[
-        Optional[list[str]], typer.Argument(help="Pass a series of PATH parameters", rich_help_panel="Request Parameters")
+        Optional[list[str]], typer.Argument(help="Pass a series of PATH parameters",
+                                            rich_help_panel="Request Parameters")
     ] = None,
     query: Annotated[
         list[str], typer.Option(
@@ -164,6 +169,45 @@ def logout(
     """
 
     cmd_utils.execute_with_verbosity(client_factory.logout, verbose)
+
+
+@app.command()
+def status(
+    verbose: Annotated[
+        bool, typer.Option(help="Execution Verbosity")
+    ] = False,
+):
+    """Prints the current login status.
+    """
+
+    session = client_factory.load_session_with_verbosity(verbose)
+    if session:
+        typer.echo(f"Session active for URL: {session.api_url}")
+        typer.echo(f"Token expiration time: {session.token_expiration_time}")
+        typer.echo(f"User ID: {session.user_id}")
+
+        def load_and_print_user():
+            if verbose:
+                typer.echo(typer.style("Loading user details...", fg=typer.colors.BRIGHT_BLACK))
+
+            client = client_factory.get_client_with_verbosity(verbose)
+            user = client.send_request_by_callback(
+                DefaultApi.users_presenter_action_detail, path_params={"id": session.user_id}
+            ).get_payload()
+            if user is None:
+                typer.echo("User not found.", err=True)
+            else:
+                typer.echo(f"Full name: {user['fullName']}")
+                typer.echo(f"Email: {user['privateData']['email']}")
+                for service, login in user['privateData'].get('externalIds', {}).items():
+                    typer.echo(f"External login [{service}]: {login}")
+                typer.echo(f"Role: {user['privateData']['role']}")
+
+                if verbose:
+                    typer.echo(typer.style("\nFull user details:", fg=typer.colors.BRIGHT_BLACK))
+                    typer.echo(json.dumps(user, indent=4))
+
+        cmd_utils.execute_with_verbosity(load_and_print_user, verbose)
 
 
 if __name__ == "__main__":

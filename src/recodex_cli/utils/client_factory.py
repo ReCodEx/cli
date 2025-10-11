@@ -92,3 +92,32 @@ def get_client_with_verbosity(verbose: bool) -> Client:
     """
 
     return execute_with_verbosity(client_factory.get_client_from_session, verbose)
+
+
+def load_session_with_verbosity(verbose: bool):
+    """Loads the local user context file.
+
+    Args:
+        verbose (bool): Whether to truncate error messages.
+
+    Returns:
+        UserSession | None: Returns a user session object or None if no session file exists.
+    """
+
+    session = client_factory.load_session()
+    if session is None:
+        typer.echo("No session found.")
+        if verbose:
+            typer.echo(f"Session file path: {client_factory.session_path}")
+        return None
+
+    if session.is_token_expired:
+        typer.echo("Session token has expired.")
+        if verbose:
+            typer.echo(f"Token expired at {session.token_expiration_time}.")
+            typer.echo(f"Expired API URL: {session.api_url}")
+            typer.echo(f"Expired user ID: {session.user_id}")
+
+        return None
+
+    return session
