@@ -111,13 +111,18 @@ def load_session_with_verbosity(verbose: bool):
             typer.echo(f"Session file path: {client_factory.session_path}")
         return None
 
-    if session.is_token_expired:
+    if session.is_token_expired():
         typer.echo("Session token has expired.")
         if verbose:
-            typer.echo(f"Token expired at {session.token_expiration_time}.")
+            typer.echo(f"Token expired at {session.get_token_expiration_time()}.")
             typer.echo(f"Expired API URL: {session.api_url}")
-            typer.echo(f"Expired user ID: {session.user_id}")
+            typer.echo(f"Expired user ID: {session.get_user_id()}")
 
         return None
 
     return session
+
+
+def refresh_session():
+    """Refresh the session token even if it is not close to expiration."""
+    client_factory.refresh_session()

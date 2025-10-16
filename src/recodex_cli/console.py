@@ -177,14 +177,14 @@ def status(
         bool, typer.Option(help="Execution Verbosity")
     ] = False,
 ):
-    """Prints the current login status.
+    """Prints the current session status.
     """
 
     session = client_factory.load_session_with_verbosity(verbose)
     if session:
-        typer.echo(f"Session active for URL: {session.api_url}")
-        typer.echo(f"Token expiration time: {session.token_expiration_time}")
-        typer.echo(f"User ID: {session.user_id}")
+        typer.echo(f"Session active for URL: {session.get_api_url()}")
+        typer.echo(f"Token expiration time: {session.get_token_expiration_time()}")
+        typer.echo(f"User ID: {session.get_user_id()}")
 
         def load_and_print_user():
             if verbose:
@@ -192,7 +192,7 @@ def status(
 
             client = client_factory.get_client_with_verbosity(verbose)
             user = client.send_request_by_callback(
-                DefaultApi.users_presenter_action_detail, path_params={"id": session.user_id}
+                DefaultApi.users_presenter_action_detail, path_params={"id": session.get_user_id()}
             ).get_payload()
             if user is None:
                 typer.echo("User not found.", err=True)
@@ -208,6 +208,20 @@ def status(
                     typer.echo(json.dumps(user, indent=4))
 
         cmd_utils.execute_with_verbosity(load_and_print_user, verbose)
+
+
+@app.command()
+def refresh(
+    verbose: Annotated[
+        bool, typer.Option(help="Execution Verbosity")
+    ] = False,
+):
+    """Refreshes the current session by obtaining a new token.
+
+    The session must have a valid token.
+    """
+
+    cmd_utils.execute_with_verbosity(client_factory.refresh_session, verbose)
 
 
 if __name__ == "__main__":
