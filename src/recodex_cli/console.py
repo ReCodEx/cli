@@ -10,7 +10,7 @@ from .utils import cmd_utils as cmd_utils
 from .utils.login_info import LoginInfo
 from .call_command import command as cmd
 from .call_command.command_state import CommandState
-from .plugins import file_plugins, info_plugins
+from .plugins import file_plugins, info_plugins, assignment_plugins
 
 
 app = typer.Typer()
@@ -19,6 +19,7 @@ state = CommandState()
 # register plugins
 app.add_typer(file_plugins.app, name="file")
 app.add_typer(info_plugins.app, name="info")
+app.add_typer(assignment_plugins.app, name="assignment", help="Contains subcommands related to exercise assignments")
 
 
 @app.command()
