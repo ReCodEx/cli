@@ -4,13 +4,13 @@ requires = [
   "certifi>=14.05.14",
   "typer>=0.16",
   "inquirer>=3.4.0",
-  "recodex-pylib>=0.2.1"
+  "recodex-pylib>=0.2.2"
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "recodex-cli"
-version = "0.2.1"
+version = "0.2.2"
 authors = [
   { name="Vojtech Kloda", email="vojtech.kloda@gmail.com" },
   { name="Martin Kruliš", email="krulis@d3s.mff.cuni.cz"},
@@ -28,7 +28,7 @@ dependencies = [
   "certifi>=14.05.14",
   "typer>=0.16",
   "inquirer>=3.4.0",
-  "recodex-pylib>=0.2.1"
+  "recodex-pylib>=0.2.2"
 ]
 
 [project.scripts]
