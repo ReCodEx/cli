@@ -117,19 +117,42 @@ def get_param_info_text_tokens(param: dict) -> dict:
     """
 
     # get info
-    name = param["name"]
-    desc = param["description"]
-    type = param["schema"]["type"]
-    if param["schema"]["nullable"]:
+    schema = param.get("schema", {})
+    type = schema.get("type", "?")
+    if schema.get("nullable", False):
         type += "|null"
-    required = param["required"]
 
     tokens = {
-        "name": name,
+        "name": param.get("name", ""),
         "type": f"[{type}]",
+        "opt": "" if param.get("required", False) else "[OPT]",
+        "desc": param.get("description", "")
     }
-    if not required:
-        tokens["opt"] = "[OPT]"
-    tokens["desc"] = desc
 
     return tokens
+
+
+def get_body_params_info_text_tokens(schema: dict) -> list[dict]:
+    """Parses a body schema and yields a description of the body parameters.
+
+    Returns:
+        list[dict]: List of top-level parameters, each represented as a dictionary containing
+        the name, type, desc, opt keys describing the body parameter.
+    """
+
+    params = []
+    required = schema.get("required", [])
+
+    for name, prop in schema.get("properties", {}).items():
+        type = prop.get("type", "?")
+        if prop.get("nullable", False):
+            type += "|null"
+        tokens = {
+            "name": name,
+            "type": f"[{type}]",
+            "desc": prop.get("description", ""),
+            "opt": "" if name in required else "[OPT]"
+        }
+        params.append(tokens)
+
+    return params

@@ -22,7 +22,7 @@ app.add_typer(info_plugins.app, name="info")
 
 
 @app.command()
-def call(
+def call(  # noqa: C901
     endpoint: Annotated[
         str, typer.Argument(help="Endpoint identifier in <presenter.action> format", is_eager=True)
     ] = "",

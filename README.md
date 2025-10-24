@@ -144,7 +144,23 @@ The client can also be extended with plugins that can streamline common request 
     recodex info swagger
     ```
 
-### Examples
+## Examples
 
 The following examples can be used as snippets to quickly perform common tasks (just replace parameters as needed).
 
+### Group management
+
+**Add a student to a group:**
+```bash
+recodex call groups.add_student <group-id> <user-id>
+```
+
+**Remove a student from a group:**
+```bash
+recodex call groups.remove_student <group-id> <user-id>
+```
+
+**Add a member (admin) to a group (this does not work for students):**
+```bash
+recodex call groups.add_member <group-id> <user-id> --body {\"type\":\"admin\"}
+```
