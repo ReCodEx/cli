@@ -22,7 +22,7 @@ class HelpPrinter:
 
         rows = ["" for i in range(len(rows_tokenized))]
 
-        self.__add_text_token(rows, rows_tokenized, "python_name", "bright_cyan")
+        self.__add_text_token(rows, rows_tokenized, "name", "bright_cyan")
         self.__add_text_token(rows, rows_tokenized, "type", "yellow")
         self.__add_text_token(rows, rows_tokenized, "opt", "magenta")
         self.__add_text_token(rows, rows_tokenized, "desc")

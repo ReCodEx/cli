@@ -81,7 +81,7 @@ def path_list_to_dict(
     elif len(path_params) > len(path_values):
         missing_params = []
         for i in range(len(path_values), len(path_params)):
-            missing_params.append(path_params[i]["python_name"])
+            missing_params.append(path_params[i]["name"])
         params_text = ", ".join(missing_params)
         plural_text = "s are" if len(missing_params) > 1 else ' is'
         raise Exception(f"The following PATH parameter{plural_text} missing: {params_text}.")
@@ -89,7 +89,7 @@ def path_list_to_dict(
     # construct param_name->param_value dict
     path_dict = {}
     for i in range(len(path_params)):
-        path_dict[path_params[i]["python_name"]] = path_values[i]
+        path_dict[path_params[i]["name"]] = path_values[i]
     return path_dict
 
 
@@ -110,7 +110,7 @@ def query_list_to_dict(
         value = query_value[split_pos + 1:]
 
         query_param = endpoint_resolver.get_query_param(presenter, action, name)
-        if not query_param or name != query_param["python_name"]:
+        if not query_param or name != query_param["name"]:
             raise Exception(f"Unknown QUERY parameter: {name}.")
 
         # handle arrays and objects
@@ -181,7 +181,7 @@ def prompt_query_values(params):
     for param in params:
         prompt_tokens = cmd_utils.get_param_info_text_tokens(param)
         prompt = " ".join(prompt_tokens.values())
-        name = param["python_name"]
+        name = param["name"]
         required = param["required"]
 
         # get prompt value

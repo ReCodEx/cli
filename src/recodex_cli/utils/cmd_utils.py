@@ -113,11 +113,11 @@ def get_param_info_text_tokens(param: dict) -> dict:
         param (dict): A dictionary representing the parameter.
 
     Returns:
-        dict: A dictionary containing the python_name, type, desc, opt keys describing the parameter.
+        dict: A dictionary containing the name, type, desc, opt keys describing the parameter.
     """
 
     # get info
-    name = param["python_name"]
+    name = param["name"]
     desc = param["description"]
     type = param["schema"]["type"]
     if param["schema"]["nullable"]:
@@ -125,7 +125,7 @@ def get_param_info_text_tokens(param: dict) -> dict:
     required = param["required"]
 
     tokens = {
-        "python_name": name,
+        "name": name,
         "type": f"[{type}]",
     }
     if not required:
