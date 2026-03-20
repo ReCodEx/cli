@@ -1,6 +1,8 @@
 import typer
 from recodex import client_factory
 from recodex.client import Client
+from recodex.generated.swagger_client import ApiClient
+from recodex.generated.swagger_client.configuration import Configuration
 
 from .cmd_utils import execute_with_verbosity
 from .login_info import LoginInfo
@@ -23,6 +25,29 @@ def login(login_info: LoginInfo, verbose=False):
     if user_context is not None and login_info.api_url is None:
         print("Reusing API URL from session file.")
         login_info.api_url = user_context.api_url
+
+    # check the API URL is right
+    try:
+        # perform a HTTP GET request to the API URL to check if it is correct and reachable
+        config = Configuration()
+        config.host = login_info.api_url
+        unauth_client = ApiClient(config)
+        data, code, _ = unauth_client.call_api(
+            '/v1/', 'GET', _return_http_data_only=False, response_type="object", _request_timeout=10)
+        if code != 200:
+            raise Exception(f"Unexpected response code {code} when connecting to the API URL {login_info.api_url}.")
+        if (not data or type(data) is not dict or "project" not in data or data["project"] != "ReCodEx API" or
+                "version" not in data):
+            if verbose:
+                print("Response:", end="")
+                print(data)
+            raise Exception(f"Unexpected response data when connecting to the API URL {login_info.api_url}.")
+
+        print(f'{login_info.api_url} refers to valid ReCodEx API version {data["version"]}')
+
+    except Exception as e:
+        print(f"Could not connect to the provided API URL {login_info.api_url}.")
+        raise e
 
     # prompt the API URL and API token and overwrite any existing session file
     if login_info.use_token_prompt:
